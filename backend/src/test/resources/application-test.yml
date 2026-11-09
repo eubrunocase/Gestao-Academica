@@ -1,0 +1,35 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:gestao;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+  mvc:
+    problemdetails:
+      enabled: false
+
+server:
+  port: 0
+
+jwt:
+  secret: test-secret-key-with-at-least-32-characters-0123456789
+  expiracao-minutos: 120
+
+academico:
+  media-aprovacao: 7.0
+  frequencia-minima: 75
+  alerta-frequencia-margem: 5
+  login-max-tentativas: 5
+  login-bloqueio-minutos: 15
+  seed-enabled: false
+
+gemini:
+  api-key: test
+  model: gemini-2.5-flash
+  base-url: https://example.invalid
+  fallback-enabled: false
+  system-prompt: teste

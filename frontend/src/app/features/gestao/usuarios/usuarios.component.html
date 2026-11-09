@@ -1,0 +1,139 @@
+<app-page-header
+  titulo="Usuários"
+  subtitulo="Cadastro e gestão de alunos, professores, secretaria, coordenação e administração."
+>
+  <button mat-flat-button color="primary" type="button" (click)="novo()">
+    <mat-icon aria-hidden="true">person_add</mat-icon>
+    Novo usuário
+  </button>
+</app-page-header>
+
+@if (carregando()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Carregando usuários" />
+}
+
+@if (erro()) {
+  <div class="alert alert-danger" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <span>{{ erro() }}</span>
+  </div>
+}
+
+<mat-card class="filtros">
+  <mat-card-content>
+    <form class="form-filtros" (ngSubmit)="aplicarFiltros()">
+      <mat-form-field appearance="outline">
+        <mat-label>Buscar por nome</mat-label>
+        <input matInput [formControl]="busca" placeholder="Digite o nome" />
+        <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Perfil</mat-label>
+        <mat-select [formControl]="perfilFiltro">
+          <mat-option value="">Todos os perfis</mat-option>
+          @for (perfil of perfis; track perfil) {
+            <mat-option [value]="perfil">{{ rotuloPerfil[perfil] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <div class="acoes-filtro">
+        <button mat-flat-button color="primary" type="submit">
+          <mat-icon aria-hidden="true">filter_alt</mat-icon>
+          Filtrar
+        </button>
+        <button mat-button type="button" (click)="limparFiltros()">Limpar</button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="tabela-card">
+  <mat-card-header>
+    <mat-card-title>Usuários cadastrados</mat-card-title>
+    <mat-card-subtitle>{{ total() }} usuário(s) encontrado(s)</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    @if (!carregando() && usuarios().length === 0) {
+      <app-empty-state
+        titulo="Nenhum usuário encontrado"
+        mensagem="Ajuste os filtros ou cadastre um novo usuário."
+        icone="manage_accounts"
+      >
+        <button mat-flat-button color="primary" type="button" (click)="novo()">Novo usuário</button>
+      </app-empty-state>
+    } @else {
+      <div class="table-container">
+        <table mat-table [dataSource]="usuarios()">
+          <ng-container matColumnDef="nome">
+            <th mat-header-cell *matHeaderCellDef>Nome</th>
+            <td mat-cell *matCellDef="let usuario">
+              <strong>{{ usuario.nome }}</strong>
+              @if (usuario.numeroMatricula) {
+                <div class="small muted">Matrícula {{ usuario.numeroMatricula }}</div>
+              }
+              @if (usuario.registroFuncional) {
+                <div class="small muted">Registro {{ usuario.registroFuncional }}</div>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="documento">
+            <th mat-header-cell *matHeaderCellDef>Documento</th>
+            <td mat-cell *matCellDef="let usuario">{{ usuario.documento }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef>E-mail</th>
+            <td mat-cell *matCellDef="let usuario">{{ usuario.email }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="perfil">
+            <th mat-header-cell *matHeaderCellDef>Perfil</th>
+            <td mat-cell *matCellDef="let usuario">
+              <span class="badge badge-neutral">{{ rotuloDoPerfil(usuario.perfil) }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="ativo">
+            <th mat-header-cell *matHeaderCellDef>Ativo</th>
+            <td mat-cell *matCellDef="let usuario">
+              <mat-slide-toggle
+                [checked]="usuario.ativo"
+                [attr.aria-label]="'Ativar ou desativar ' + usuario.nome"
+                (change)="alterarAtivo(usuario, $event.checked)"
+              />
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef>Ações</th>
+            <td mat-cell *matCellDef="let usuario">
+              <button
+                mat-icon-button
+                type="button"
+                [attr.aria-label]="'Editar ' + usuario.nome"
+                (click)="editar(usuario)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+          <tr mat-row *matRowDef="let row; columns: colunas"></tr>
+        </table>
+      </div>
+
+      <mat-paginator
+        [length]="total()"
+        [pageSize]="tamanho()"
+        [pageSizeOptions]="[10, 20, 50]"
+        [pageIndex]="pagina()"
+        (page)="aoPaginar($event)"
+        aria-label="Paginação de usuários"
+      />
+    }
+  </mat-card-content>
+</mat-card>

@@ -1,0 +1,156 @@
+@if (carregando()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Carregando frequência da turma" />
+}
+
+@if (erro()) {
+  <div class="alert alert-danger" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <span>{{ erro() }}</span>
+  </div>
+}
+
+<mat-card class="bloco">
+  <mat-card-header>
+    <mat-card-title>Aulas</mat-card-title>
+    <mat-card-subtitle>Selecione uma aula ou cadastre uma nova data de encontro.</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    @if (aulas().length === 0) {
+      <app-empty-state
+        titulo="Nenhuma aula cadastrada"
+        mensagem="Cadastre a primeira aula para registrar presenças."
+        icone="event"
+      />
+    } @else {
+      <mat-form-field appearance="outline">
+        <mat-label>Aula</mat-label>
+        <mat-select
+          [value]="aulaSelecionadaId()"
+          (selectionChange)="selecionarAula($event.value)"
+        >
+          @for (aula of aulas(); track aula.id) {
+            <mat-option [value]="aula.id">
+              {{ aula.data | dataBr }} — {{ aula.conteudo || 'Sem conteúdo informado' }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    <form [formGroup]="formAula" (ngSubmit)="criarAula()" class="form-aula">
+      <mat-form-field appearance="outline" class="campo-data">
+        <mat-label>Data da nova aula</mat-label>
+        <input matInput type="date" formControlName="data" />
+        @if (formAula.controls.data.hasError('required')) {
+          <mat-error>Informe a data.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Conteúdo (opcional)</mat-label>
+        <input matInput formControlName="conteudo" maxlength="255" placeholder="Ex.: Árvores binárias" />
+      </mat-form-field>
+
+      <button mat-stroked-button color="primary" type="submit" [disabled]="criando()">
+        <mat-icon aria-hidden="true">add</mat-icon>
+        {{ criando() ? 'Criando…' : 'Criar aula' }}
+      </button>
+    </form>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="bloco">
+  <mat-card-header>
+    <mat-card-title>Registro de presença</mat-card-title>
+    <mat-card-subtitle>
+      @if (aulaSelecionada(); as aula) {
+        Aula de {{ aula.data | dataBr }} — {{ aula.conteudo || 'sem conteúdo informado' }}
+      } @else {
+        Selecione uma aula acima.
+      }
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    @if (totalAlunos() === 0) {
+      <app-empty-state
+        titulo="Nenhum aluno matriculado"
+        mensagem="A turma ainda não possui alunos para registro de frequência."
+        icone="groups"
+      />
+    } @else if (!aulaSelecionada()) {
+      <app-empty-state
+        titulo="Selecione uma aula"
+        mensagem="Crie ou selecione uma aula para marcar as presenças."
+        icone="event"
+      />
+    } @else {
+      <div class="resumo-presenca">
+        <span>
+          <strong>{{ totalPresentes() }}</strong> de
+          <strong>{{ totalAlunos() }}</strong> presentes
+        </span>
+        <div class="acoes-presenca">
+          <button mat-stroked-button type="button" (click)="marcarTodos(true)">
+            <mat-icon aria-hidden="true">done_all</mat-icon>
+            Todos presentes
+          </button>
+          <button mat-stroked-button type="button" (click)="marcarTodos(false)">
+            <mat-icon aria-hidden="true">remove_done</mat-icon>
+            Todos ausentes
+          </button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="tabela-presenca" [formGroup]="formPresencas">
+          <thead>
+            <tr>
+              <th scope="col">Aluno</th>
+              <th scope="col">Matrícula</th>
+              <th scope="col">Presenças</th>
+              <th scope="col">Frequência</th>
+              <th scope="col">Presente nesta aula</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (aluno of frequencia()?.alunos ?? []; track aluno.matriculaId) {
+              <tr>
+                <th scope="row">{{ aluno.nome }}</th>
+                <td>{{ aluno.numeroMatricula }}</td>
+                <td>{{ aluno.presencas }}/{{ aluno.totalAulas }}</td>
+                <td>
+                  <app-frequencia-badge [percentual]="aluno.percentual" />
+                </td>
+                <td>
+                  <mat-checkbox
+                    [formControlName]="aluno.matriculaId.toString()"
+                    [attr.aria-label]="'Presença de ' + aluno.nome + ' na aula selecionada'"
+                  >
+                    Presente
+                  </mat-checkbox>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="acoes-salvar">
+        <span class="muted small">
+          O registro é enviado para todos os alunos da turma.
+        </span>
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          [disabled]="salvando()"
+          (click)="salvar()"
+        >
+          <mat-icon aria-hidden="true">save</mat-icon>
+          {{ salvando() ? 'Salvando…' : 'Salvar frequência' }}
+        </button>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

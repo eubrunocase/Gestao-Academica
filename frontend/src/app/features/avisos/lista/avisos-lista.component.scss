@@ -1,0 +1,46 @@
+.filtros {
+  margin-bottom: 20px;
+}
+
+.filtros mat-card-content {
+  padding-top: 8px;
+}
+
+.form-filtros {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.form-filtros mat-form-field {
+  flex: 1 1 240px;
+}
+
+.form-filtros button {
+  margin-top: 8px;
+}
+
+.avisos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.aviso-card {
+  height: 100%;
+}
+
+.aviso-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.mensagem {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+}

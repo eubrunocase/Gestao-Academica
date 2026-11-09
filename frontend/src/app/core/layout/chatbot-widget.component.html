@@ -1,0 +1,85 @@
+@if (aberto()) {
+  <section
+    class="chatbot-panel"
+    role="dialog"
+    aria-modal="false"
+    aria-labelledby="chatbot-titulo"
+    (keydown.escape)="fechar()"
+  >
+    <header class="chatbot-header">
+      <div class="chatbot-title">
+        <mat-icon aria-hidden="true">smart_toy</mat-icon>
+        <div>
+          <strong id="chatbot-titulo">Assistente virtual</strong>
+          <span>Dúvidas sobre o portal acadêmico</span>
+        </div>
+      </div>
+      <button mat-icon-button type="button" aria-label="Fechar assistente virtual" (click)="fechar()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <div class="chatbot-aviso" role="note">
+      <mat-icon aria-hidden="true">shield</mat-icon>
+      <span>
+        Não informe senhas, documentos ou dados sensíveis. As respostas são
+        informativas e podem conter imprecisões.
+      </span>
+    </div>
+
+    <div #areaMensagens class="chatbot-mensagens" aria-live="polite" aria-relevant="additions">
+      @for (mensagem of mensagens(); track $index) {
+        <div class="mensagem" [class.usuario]="mensagem.autor === 'usuario'">
+          <span class="bolha">{{ mensagem.texto }}</span>
+        </div>
+      }
+      @if (enviando()) {
+        <div class="mensagem">
+          <span class="bolha digitando" aria-label="Assistente digitando">
+            digitando<span class="pontos"><i></i><i></i><i></i></span>
+          </span>
+        </div>
+      }
+    </div>
+
+    <footer class="chatbot-entrada">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Sua dúvida</mat-label>
+        <input
+          matInput
+          type="text"
+          maxlength="1000"
+          autocomplete="off"
+          [value]="texto()"
+          (input)="aoDigitar($event)"
+          (keydown)="aoPressionarEnter($event)"
+          aria-describedby="chatbot-contador"
+        />
+      </mat-form-field>
+      <button
+        mat-fab
+        type="button"
+        class="botao-enviar"
+        [disabled]="!podeEnviar()"
+        aria-label="Enviar pergunta"
+        (click)="enviar()"
+      >
+        <mat-icon>send</mat-icon>
+      </button>
+    </footer>
+    <div id="chatbot-contador" class="chatbot-contador">
+      {{ restante() }} caracteres restantes
+    </div>
+  </section>
+}
+
+<button
+  mat-fab
+  type="button"
+  class="chatbot-fab"
+  [attr.aria-label]="aberto() ? 'Fechar assistente virtual' : 'Abrir assistente virtual'"
+  [attr.aria-expanded]="aberto()"
+  (click)="alternar()"
+>
+  <mat-icon>{{ aberto() ? 'close' : 'forum' }}</mat-icon>
+</button>

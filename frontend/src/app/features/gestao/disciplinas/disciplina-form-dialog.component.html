@@ -1,0 +1,55 @@
+<h2 mat-dialog-title>{{ dados.disciplina ? 'Editar disciplina' : 'Nova disciplina' }}</h2>
+<mat-dialog-content>
+  @if (erro()) {
+    <div class="alert alert-danger" role="alert">
+      <mat-icon aria-hidden="true">error</mat-icon>
+      <span>{{ erro() }}</span>
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="salvar()" class="form-grid">
+    <mat-form-field appearance="outline" class="span-2">
+      <mat-label>Nome da disciplina</mat-label>
+      <input matInput formControlName="nome" maxlength="120" />
+      @if (form.controls.nome.hasError('required')) {
+        <mat-error>Informe o nome.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Carga horária (h)</mat-label>
+      <input matInput type="number" min="1" formControlName="cargaHoraria" />
+      @if (form.controls.cargaHoraria.invalid) {
+        <mat-error>Informe uma carga horária positiva.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Curso</mat-label>
+      <mat-select formControlName="cursoId">
+        @for (curso of dados.cursos; track curso.id) {
+          <mat-option [value]="curso.id">{{ curso.nome }}</mat-option>
+        }
+      </mat-select>
+      @if (form.controls.cursoId.hasError('required')) {
+        <mat-error>Selecione o curso.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="span-2">
+      <mat-label>Pré-requisitos (opcional)</mat-label>
+      <mat-select formControlName="prerequisitoIds" multiple>
+        @for (disciplina of opcoesPrerequisito(); track disciplina.id) {
+          <mat-option [value]="disciplina.id">{{ disciplina.nome }}</mat-option>
+        }
+      </mat-select>
+      <mat-hint>O aluno precisa ter sido aprovado nos pré-requisitos para se matricular.</mat-hint>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="fechar()">Cancelar</button>
+  <button mat-flat-button color="primary" type="button" [disabled]="salvando()" (click)="salvar()">
+    {{ salvando() ? 'Salvando…' : 'Salvar' }}
+  </button>
+</mat-dialog-actions>

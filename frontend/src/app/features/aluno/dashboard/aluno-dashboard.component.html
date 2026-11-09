@@ -1,0 +1,165 @@
+<app-page-header
+  [titulo]="'Olá, ' + (dados()?.nome || auth.usuario()?.nome || 'estudante')"
+  [subtitulo]="dados()?.periodoLetivo ? 'Período letivo ' + dados()?.periodoLetivo : 'Resumo do seu percurso acadêmico'"
+>
+  <button mat-stroked-button type="button" (click)="carregar()" class="print-hide">
+    <mat-icon aria-hidden="true">refresh</mat-icon>
+    Atualizar
+  </button>
+</app-page-header>
+
+@if (carregando()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Carregando dashboard" />
+}
+
+@if (erro()) {
+  <div class="alert alert-danger" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <span>{{ erro() }}</span>
+  </div>
+}
+
+@if (dados(); as resumo) {
+  @if (resumo.alertaFrequencia) {
+    <div class="alert alert-warning alerta-frequencia" role="alert">
+      <mat-icon aria-hidden="true">warning</mat-icon>
+      <div>
+        <strong>Atenção à frequência</strong>
+        <p>
+          Você está próximo ou abaixo do limite mínimo de 75% em:
+          <strong>{{ nomesDisciplinasRisco() }}</strong>.
+        </p>
+        <a mat-button color="primary" routerLink="/aluno/frequencia">Ver frequência detalhada</a>
+      </div>
+    </div>
+  }
+
+  <section class="stats-grid" aria-label="Indicadores do aluno">
+    <app-stat-card
+      rotulo="Disciplinas em curso"
+      [valor]="resumo.disciplinasAtivas"
+      icone="class"
+      detalhe="Matrículas ativas no período"
+    />
+    <app-stat-card
+      rotulo="Média geral"
+      [valor]="resumo.mediaGeral !== null ? (resumo.mediaGeral | number: '1.2-2') : '—'"
+      icone="trending_up"
+      [tom]="(resumo.mediaGeral ?? 0) >= 7 ? 'sucesso' : 'alerta'"
+      detalhe="Média ponderada das avaliações"
+    />
+    <app-stat-card
+      rotulo="Frequência média"
+      [valor]="resumo.frequenciaMedia | percentual"
+      icone="fact_check"
+      [tom]="resumo.alertaFrequencia ? 'risco' : 'sucesso'"
+      detalhe="Limite mínimo: 75%"
+    />
+    <app-stat-card
+      rotulo="Avisos recentes"
+      [valor]="resumo.avisos.length"
+      icone="campaign"
+      detalhe="Comunicados do seu escopo"
+    />
+  </section>
+
+  <section class="atalhos" aria-labelledby="atalhos-titulo">
+    <h2 id="atalhos-titulo" class="section-title">Acesso rápido</h2>
+    <div class="atalhos-grid">
+      @for (atalho of atalhos; track atalho.rota) {
+        <a mat-card class="atalho" [routerLink]="atalho.rota">
+          <mat-icon aria-hidden="true">{{ atalho.icone }}</mat-icon>
+          <span>
+            <strong>{{ atalho.rotulo }}</strong>
+            <small>{{ atalho.descricao }}</small>
+          </span>
+          <mat-icon class="seta" aria-hidden="true">chevron_right</mat-icon>
+        </a>
+      }
+    </div>
+  </section>
+
+  <div class="conteudo-duplo">
+    <mat-card class="bloco">
+      <mat-card-header>
+        <mat-card-title>Minhas disciplinas</mat-card-title>
+        <mat-card-subtitle>Situação atual por matrícula</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        @if (resumo.boletins.length === 0) {
+          <app-empty-state
+            titulo="Nenhuma disciplina ativa"
+            mensagem="Realize sua matrícula para acompanhar notas e frequência."
+            icone="class"
+          >
+            <a mat-flat-button color="primary" routerLink="/aluno/matricula">Ir para matrícula</a>
+          </app-empty-state>
+        } @else {
+          <div class="table-container">
+            <table mat-table [dataSource]="resumo.boletins">
+              <ng-container matColumnDef="disciplina">
+                <th mat-header-cell *matHeaderCellDef>Disciplina</th>
+                <td mat-cell *matCellDef="let boletim">
+                  <strong>{{ boletim.disciplina }}</strong>
+                  <div class="small muted">{{ boletim.professor }}</div>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="media">
+                <th mat-header-cell *matHeaderCellDef>Média</th>
+                <td mat-cell *matCellDef="let boletim">
+                  {{ boletim.media !== null ? (boletim.media | number: '1.2-2') : '—' }}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="frequencia">
+                <th mat-header-cell *matHeaderCellDef>Frequência</th>
+                <td mat-cell *matCellDef="let boletim">
+                  {{ boletim.frequencia | percentual }}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="situacao">
+                <th mat-header-cell *matHeaderCellDef>Situação</th>
+                <td mat-cell *matCellDef="let boletim">
+                  <span class="badge" [class]="'badge ' + classeStatus(boletim)">
+                    {{ rotuloStatus(boletim) }}
+                  </span>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="colunasBoletins"></tr>
+              <tr mat-row *matRowDef="let row; columns: colunasBoletins"></tr>
+            </table>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="bloco">
+      <mat-card-header>
+        <mat-card-title>Avisos recentes</mat-card-title>
+        <mat-card-subtitle>Comunicados publicados para você</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        @if (resumo.avisos.length === 0) {
+          <app-empty-state
+            titulo="Sem avisos"
+            mensagem="Quando houver comunicados, eles aparecerão aqui."
+            icone="campaign"
+          />
+        } @else {
+          <ul class="avisos-lista">
+            @for (aviso of resumo.avisos.slice(0, 4); track aviso.id) {
+              <li>
+                <div class="aviso-topo">
+                  <strong>{{ aviso.titulo }}</strong>
+                  <span class="badge badge-neutral">{{ rotuloEscopo(aviso.escopo) }}</span>
+                </div>
+                <p>{{ aviso.mensagem }}</p>
+                <small class="muted">{{ aviso.autor }} · {{ aviso.criadoEm | dataBr: true }}</small>
+              </li>
+            }
+          </ul>
+          <a mat-button color="primary" routerLink="/avisos">Ver mural completo</a>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+}

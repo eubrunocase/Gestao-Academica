@@ -1,0 +1,59 @@
+.filtros {
+  margin-bottom: 20px;
+}
+
+.filtros mat-card-content {
+  padding-top: 8px;
+}
+
+.form-filtros {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.form-filtros mat-form-field {
+  flex: 1 1 220px;
+}
+
+.form-filtros button {
+  margin-top: 8px;
+}
+
+.resultado {
+  margin-top: 20px;
+}
+
+.resultado mat-card-content {
+  padding-top: 12px;
+}
+
+.resumo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.resumo-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--ga-border);
+  border-radius: 12px;
+  background: #f6f8fd;
+}
+
+.resumo-item > span:first-child {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ga-text-muted);
+  font-weight: 600;
+}
+
+.resumo-item strong {
+  font-size: 1rem;
+}

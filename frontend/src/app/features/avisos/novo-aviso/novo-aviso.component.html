@@ -1,0 +1,105 @@
+<app-page-header
+  titulo="Novo aviso"
+  subtitulo="Publique um comunicado para todos, para um curso ou para uma turma."
+/>
+
+@if (carregando()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Carregando dados do aviso" />
+}
+
+@if (erro()) {
+  <div class="alert alert-danger" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <span>{{ erro() }}</span>
+  </div>
+}
+
+@if (ehProfessor()) {
+  <div class="alert alert-info" role="note">
+    <mat-icon aria-hidden="true">info</mat-icon>
+    <span>
+      Professores podem publicar avisos apenas para as próprias turmas. Avisos
+      gerais e por curso são responsabilidade da Coordenação, Secretaria ou
+      Administração.
+    </span>
+  </div>
+}
+
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Dados do aviso</mat-card-title>
+    <mat-card-subtitle>Todos os campos são obrigatórios, exceto a seleção de contexto.</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="form" (ngSubmit)="criar()" class="form-aviso" novalidate>
+      <mat-form-field appearance="outline">
+        <mat-label>Título</mat-label>
+        <input matInput formControlName="titulo" maxlength="160" />
+        @if (form.controls.titulo.hasError('required')) {
+          <mat-error>Informe o título.</mat-error>
+        } @else if (form.controls.titulo.hasError('maxlength')) {
+          <mat-error>Máximo de 160 caracteres.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Escopo</mat-label>
+        <mat-select formControlName="escopo">
+          @for (escopo of escopos(); track escopo) {
+            <mat-option [value]="escopo">{{ rotuloEscopo[escopo] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @if (form.controls.escopo.value === 'TURMA') {
+        <mat-form-field appearance="outline">
+          <mat-label>Turma</mat-label>
+          <mat-select formControlName="turmaId">
+            @for (turma of turmas(); track turma.id) {
+              <mat-option [value]="turma.id">
+                {{ turma.disciplina.nome }} — {{ turma.periodoLetivo }}
+              </mat-option>
+            }
+          </mat-select>
+          @if (form.controls.turmaId.hasError('required')) {
+            <mat-error>Selecione a turma.</mat-error>
+          }
+        </mat-form-field>
+      }
+
+      @if (form.controls.escopo.value === 'CURSO') {
+        <mat-form-field appearance="outline">
+          <mat-label>Curso</mat-label>
+          <mat-select formControlName="cursoId">
+            @for (curso of cursos(); track curso.id) {
+              <mat-option [value]="curso.id">{{ curso.nome }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.cursoId.hasError('required')) {
+            <mat-error>Selecione o curso.</mat-error>
+          }
+        </mat-form-field>
+      }
+
+      <mat-form-field appearance="outline" class="span-2">
+        <mat-label>Mensagem</mat-label>
+        <textarea matInput formControlName="mensagem" rows="6" maxlength="2000"></textarea>
+        @if (form.controls.mensagem.hasError('required')) {
+          <mat-error>Informe a mensagem.</mat-error>
+        } @else if (form.controls.mensagem.hasError('maxlength')) {
+          <mat-error>Máximo de 2000 caracteres.</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="acoes span-2">
+        <button mat-button type="button" (click)="cancelar()">
+          Cancelar
+        </button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="salvando()">
+          <mat-icon aria-hidden="true">campaign</mat-icon>
+          {{ salvando() ? 'Publicando…' : 'Publicar aviso' }}
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

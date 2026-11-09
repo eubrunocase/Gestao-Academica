@@ -1,0 +1,100 @@
+<app-page-header titulo="Disciplinas" subtitulo="Componentes curriculares, carga horária e pré-requisitos.">
+  <button mat-flat-button color="primary" type="button" (click)="novo()">
+    <mat-icon aria-hidden="true">add</mat-icon>
+    Nova disciplina
+  </button>
+</app-page-header>
+
+@if (carregando()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Carregando disciplinas" />
+}
+
+@if (erro()) {
+  <div class="alert alert-danger" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <span>{{ erro() }}</span>
+  </div>
+}
+
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Lista de disciplinas</mat-card-title>
+    <mat-card-subtitle>{{ filtradas().length }} disciplina(s)</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="busca">
+      <mat-form-field appearance="outline">
+        <mat-label>Buscar disciplina ou curso</mat-label>
+        <input matInput [formControl]="busca" (input)="buscar()" placeholder="Digite para filtrar" />
+        <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    @if (!carregando() && filtradas().length === 0) {
+      <app-empty-state
+        titulo="Nenhuma disciplina encontrada"
+        mensagem="Cadastre uma disciplina ou ajuste a busca."
+        icone="menu_book"
+      >
+        <button mat-flat-button color="primary" type="button" (click)="novo()">Nova disciplina</button>
+      </app-empty-state>
+    } @else {
+      <div class="table-container">
+        <table mat-table [dataSource]="paginadas()">
+          <ng-container matColumnDef="nome">
+            <th mat-header-cell *matHeaderCellDef>Disciplina</th>
+            <td mat-cell *matCellDef="let disciplina"><strong>{{ disciplina.nome }}</strong></td>
+          </ng-container>
+
+          <ng-container matColumnDef="curso">
+            <th mat-header-cell *matHeaderCellDef>Curso</th>
+            <td mat-cell *matCellDef="let disciplina">{{ disciplina.curso.nome }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="carga">
+            <th mat-header-cell *matHeaderCellDef>Carga</th>
+            <td mat-cell *matCellDef="let disciplina">{{ disciplina.cargaHoraria }}h</td>
+          </ng-container>
+
+          <ng-container matColumnDef="prerequisitos">
+            <th mat-header-cell *matHeaderCellDef>Pré-requisitos</th>
+            <td mat-cell *matCellDef="let disciplina">
+              @if (disciplina.prerequisitos.length === 0) {
+                <span class="muted small">Nenhum</span>
+              } @else {
+                <mat-chip-set>
+                  @for (prerequisito of disciplina.prerequisitos; track prerequisito.id) {
+                    <mat-chip>{{ prerequisito.nome }}</mat-chip>
+                  }
+                </mat-chip-set>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef>Ações</th>
+            <td mat-cell *matCellDef="let disciplina" class="acoes">
+              <button mat-icon-button type="button" [attr.aria-label]="'Editar ' + disciplina.nome" (click)="editar(disciplina)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" color="warn" [attr.aria-label]="'Excluir ' + disciplina.nome" (click)="excluir(disciplina)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+          <tr mat-row *matRowDef="let row; columns: colunas"></tr>
+        </table>
+      </div>
+      <mat-paginator
+        [length]="filtradas().length"
+        [pageSize]="tamanho()"
+        [pageSizeOptions]="[10, 20, 50]"
+        [pageIndex]="pagina()"
+        (page)="aoPaginar($event)"
+        aria-label="Paginação de disciplinas"
+      />
+    }
+  </mat-card-content>
+</mat-card>

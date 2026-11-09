@@ -1,0 +1,142 @@
+.bloco {
+  margin-bottom: 20px;
+}
+
+.bloco mat-card-content {
+  padding-top: 12px;
+}
+
+.lista-avaliacoes {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.lista-avaliacoes li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--ga-border);
+  border-radius: 12px;
+  padding: 6px 6px 6px 12px;
+  background: #f8f9fd;
+}
+
+.lista-avaliacoes li > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-avaliacao {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--ga-border);
+  padding-top: 16px;
+}
+
+.form-avaliacao mat-form-field {
+  flex: 1 1 260px;
+}
+
+.form-avaliacao .campo-peso {
+  flex: 0 1 120px;
+}
+
+.form-avaliacao button {
+  margin-top: 8px;
+}
+
+.grade-notas {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.grade-notas th,
+.grade-notas td {
+  border-bottom: 1px solid var(--ga-border);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.grade-notas thead th {
+  font-size: 0.78rem;
+  color: var(--ga-text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.grade-notas thead th small {
+  display: block;
+  font-weight: 400;
+}
+
+.grade-notas tbody th {
+  font-weight: 500;
+  min-width: 170px;
+}
+
+.grade-notas tbody th small {
+  display: block;
+  font-size: 0.72rem;
+}
+
+.nota-input {
+  width: 76px;
+  height: 36px;
+  border: 1px solid var(--ga-border);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--ga-text);
+  background: #fff;
+}
+
+.nota-input:focus {
+  border-color: var(--ga-primary);
+}
+
+.nota-input.invalido {
+  border-color: var(--ga-warn);
+  background: var(--ga-warn-bg);
+}
+
+.erro-campo {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--ga-warn);
+}
+
+.media {
+  font-weight: 700;
+  color: var(--ga-primary-dark);
+  white-space: nowrap;
+}
+
+.acoes-notas {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 700px) {
+  .form-avaliacao {
+    flex-direction: column;
+  }
+
+  .form-avaliacao mat-form-field,
+  .form-avaliacao .campo-peso {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}

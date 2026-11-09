@@ -1,0 +1,113 @@
+<app-page-header
+  titulo="Nova denúncia"
+  subtitulo="Canal seguro para registrar relatos de assédio, discriminação, infraestrutura, segurança e conduta."
+/>
+
+@if (criada(); as denuncia) {
+  <mat-card class="sucesso-card">
+    <mat-card-header>
+      <mat-card-title>Denúncia registrada</mat-card-title>
+      <mat-card-subtitle>Guarde o protocolo para acompanhar o andamento.</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="protocolo-box" role="status">
+        <span>Protocolo</span>
+        <strong>{{ denuncia.protocolo }}</strong>
+        <span class="badge badge-warning">{{ rotuloStatus[denuncia.status] }}</span>
+      </div>
+
+      <p>
+        Registro em {{ denuncia.criadoEm | dataBr: true }}.
+        {{ denuncia.anonima ? 'A denúncia foi registrada de forma anônima.' : 'Sua identificação foi registrada e será tratada com sigilo.' }}
+      </p>
+
+      <div class="acoes">
+        <button mat-flat-button color="primary" type="button" (click)="copiarProtocolo()">
+          <mat-icon aria-hidden="true">content_copy</mat-icon>
+          Copiar protocolo
+        </button>
+        <a
+          mat-stroked-button
+          [routerLink]="['/denuncias/acompanhar']"
+          [queryParams]="{ protocolo: denuncia.protocolo }"
+        >
+          Acompanhar denúncia
+        </a>
+        <button mat-button type="button" (click)="novaDenuncia()">Registrar outra</button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+} @else {
+  <div class="alert alert-info" role="note">
+    <mat-icon aria-hidden="true">shield</mat-icon>
+    <span>
+      A denúncia pode ser anônima. Evite incluir dados sensíveis desnecessários.
+      O acompanhamento é feito exclusivamente pelo protocolo gerado após o envio.
+    </span>
+  </div>
+
+  @if (erro()) {
+    <div class="alert alert-danger" role="alert">
+      <mat-icon aria-hidden="true">error</mat-icon>
+      <span>{{ erro() }}</span>
+    </div>
+  }
+
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Dados da denúncia</mat-card-title>
+      <mat-card-subtitle>Categoria e descrição são obrigatórias.</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="enviar()" class="form-denuncia" novalidate>
+        <mat-form-field appearance="outline">
+          <mat-label>Categoria</mat-label>
+          <mat-select formControlName="categoria">
+            @for (categoria of categorias; track categoria.valor) {
+              <mat-option [value]="categoria.valor">{{ categoria.rotulo }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.categoria.hasError('required')) {
+            <mat-error>Selecione a categoria.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Data aproximada (opcional)</mat-label>
+          <input matInput type="date" formControlName="dataAproximada" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="span-2">
+          <mat-label>Descrição</mat-label>
+          <textarea
+            matInput
+            formControlName="descricao"
+            rows="7"
+            maxlength="4000"
+            placeholder="Descreva o ocorrido com o máximo de detalhes que se sentir confortável em compartilhar."
+          ></textarea>
+          @if (form.controls.descricao.hasError('required')) {
+            <mat-error>Informe a descrição.</mat-error>
+          } @else if (form.controls.descricao.hasError('maxlength')) {
+            <mat-error>Máximo de 4000 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="anonima span-2">
+          <mat-checkbox formControlName="anonima">Registrar anonimamente</mat-checkbox>
+          <span class="muted small">
+            Ao marcar esta opção, seu nome não será associado à denúncia. O
+            protocolo continua sendo a única forma de acompanhamento.
+          </span>
+        </div>
+
+        <div class="acoes span-2">
+          <button mat-flat-button color="primary" type="submit" [disabled]="enviando()">
+            <mat-icon aria-hidden="true">send</mat-icon>
+            {{ enviando() ? 'Enviando…' : 'Registrar denúncia' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+}

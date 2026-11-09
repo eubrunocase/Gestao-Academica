@@ -1,0 +1,50 @@
+.bloco {
+  margin-top: 20px;
+}
+
+.graficos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.grafico-card mat-card-content {
+  padding-top: 12px;
+}
+
+.chart-box {
+  position: relative;
+  height: 320px;
+}
+
+.chart-box canvas {
+  max-height: 320px;
+}
+
+.graficos-grid.interna {
+  margin-top: 12px;
+}
+
+.chart-card {
+  border: 1px solid var(--ga-border);
+  border-radius: 12px;
+  padding: 12px;
+  background: #fff;
+}
+
+.chart-card h3 {
+  font-size: 0.95rem;
+  margin: 0 0 8px;
+  color: var(--ga-primary-dark);
+}
+
+.seletor-turma {
+  max-width: 460px;
+}
+
+@media (max-width: 700px) {
+  .graficos-grid {
+    grid-template-columns: 1fr;
+  }
+}

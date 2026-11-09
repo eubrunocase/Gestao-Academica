@@ -1,0 +1,71 @@
+<h2 mat-dialog-title>{{ dados.turma ? 'Editar turma' : 'Nova turma' }}</h2>
+<mat-dialog-content>
+  @if (erro()) {
+    <div class="alert alert-danger" role="alert">
+      <mat-icon aria-hidden="true">error</mat-icon>
+      <span>{{ erro() }}</span>
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="salvar()" class="form-grid">
+    <mat-form-field appearance="outline" class="span-2">
+      <mat-label>Disciplina</mat-label>
+      <mat-select formControlName="disciplinaId">
+        @for (disciplina of dados.disciplinas; track disciplina.id) {
+          <mat-option [value]="disciplina.id">
+            {{ disciplina.nome }} — {{ disciplina.curso.nome }}
+          </mat-option>
+        }
+      </mat-select>
+      @if (form.controls.disciplinaId.hasError('required')) {
+        <mat-error>Selecione a disciplina.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Professor</mat-label>
+      @if (dados.professores.length > 0) {
+        <mat-select formControlName="professorId">
+          @for (professor of dados.professores; track professor.id) {
+            <mat-option [value]="professor.id">{{ professor.nome }}</mat-option>
+          }
+        </mat-select>
+      } @else {
+        <input matInput type="number" min="1" formControlName="professorId" placeholder="ID do professor" />
+      }
+      @if (form.controls.professorId.hasError('required')) {
+        <mat-error>Selecione o professor.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Período letivo</mat-label>
+      @if (dados.periodos.length > 0) {
+        <mat-select formControlName="periodoLetivo">
+          @for (periodo of dados.periodos; track periodo) {
+            <mat-option [value]="periodo">{{ periodo }}</mat-option>
+          }
+        </mat-select>
+      } @else {
+        <input matInput formControlName="periodoLetivo" placeholder="Ex.: 2026.2" />
+      }
+      @if (form.controls.periodoLetivo.hasError('required')) {
+        <mat-error>Informe o período letivo.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Limite de vagas</mat-label>
+      <input matInput type="number" min="1" formControlName="limiteVagas" />
+      @if (form.controls.limiteVagas.invalid) {
+        <mat-error>Informe um limite positivo.</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="fechar()">Cancelar</button>
+  <button mat-flat-button color="primary" type="button" [disabled]="salvando()" (click)="salvar()">
+    {{ salvando() ? 'Salvando…' : 'Salvar' }}
+  </button>
+</mat-dialog-actions>

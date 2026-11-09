@@ -1,0 +1,81 @@
+.resumo-turma {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.resumo-turma > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid var(--ga-border);
+  border-radius: 12px;
+  font-size: 0.84rem;
+}
+
+.resumo-turma mat-icon {
+  color: var(--ga-primary);
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.abas-turma {
+  background: transparent;
+}
+
+.aba-card {
+  margin-top: 16px;
+}
+
+.aba-card mat-card-content {
+  padding-top: 12px;
+}
+
+.aba-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.form-aviso {
+  display: grid;
+  gap: 4px;
+}
+
+.lista-avisos {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.lista-avisos li {
+  border-bottom: 1px solid var(--ga-border);
+  padding-bottom: 12px;
+}
+
+.lista-avisos li:last-child {
+  border-bottom: 0;
+}
+
+.lista-avisos p {
+  margin: 4px 0;
+  font-size: 0.86rem;
+}
+
+.acoes-relatorio {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.acoes-relatorio + .stats-grid {
+  margin-bottom: 4px;
+}

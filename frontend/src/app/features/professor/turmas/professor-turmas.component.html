@@ -1,0 +1,85 @@
+<app-page-header
+  titulo="Minhas turmas"
+  subtitulo="Acesse alunos, avaliações, frequência, avisos e relatórios de cada turma."
+>
+  <button mat-stroked-button type="button" (click)="carregar()">
+    <mat-icon aria-hidden="true">refresh</mat-icon>
+    Atualizar
+  </button>
+</app-page-header>
+
+@if (carregando()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Carregando turmas" />
+}
+
+@if (erro()) {
+  <div class="alert alert-danger" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <span>{{ erro() }}</span>
+  </div>
+}
+
+<section class="stats-grid" aria-label="Resumo das turmas">
+  <app-stat-card rotulo="Total de turmas" [valor]="turmas().length" icone="class" />
+  <app-stat-card rotulo="Em andamento" [valor]="ativas()" icone="play_circle" tom="sucesso" />
+  <app-stat-card rotulo="Encerradas" [valor]="encerradas()" icone="lock" />
+</section>
+
+@if (!carregando() && turmas().length === 0) {
+  <mat-card class="bloco">
+    <app-empty-state
+      titulo="Nenhuma turma atribuída"
+      mensagem="Quando a Secretaria vincular turmas ao seu perfil, elas aparecerão aqui."
+      icone="class"
+    />
+  </mat-card>
+} @else {
+  <div class="cards-grid turmas-grid">
+    @for (turma of turmas(); track turma.id) {
+      <mat-card class="turma-card">
+        <mat-card-header>
+          <mat-card-title>{{ turma.disciplina.nome }}</mat-card-title>
+          <mat-card-subtitle>{{ turma.periodoLetivo }}</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="linha-info">
+            <span class="badge" [class]="turma.encerrada ? 'badge badge-neutral' : 'badge badge-success'">
+              {{ turma.encerrada ? 'Encerrada' : 'Em andamento' }}
+            </span>
+            <span class="muted small">{{ turma.disciplina.cargaHoraria }}h</span>
+          </div>
+
+          <div class="dados-turma">
+            <div>
+              <mat-icon aria-hidden="true">groups</mat-icon>
+              <span>
+                <strong>{{ turma.vagasOcupadas }}</strong>
+                <small>aluno(s) matriculado(s)</small>
+              </span>
+            </div>
+            <div>
+              <mat-icon aria-hidden="true">event_seat</mat-icon>
+              <span>
+                <strong>{{ turma.vagasDisponiveis }}</strong>
+                <small>vaga(s) livre(s)</small>
+              </span>
+            </div>
+          </div>
+
+          <div class="barra-vagas" aria-hidden="true">
+            <span [style.width.%]="turma.limiteVagas ? (turma.vagasOcupadas / turma.limiteVagas) * 100 : 0"></span>
+          </div>
+          <p class="muted small">Limite: {{ turma.limiteVagas }} vagas</p>
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+          <a mat-flat-button color="primary" [routerLink]="['/professor/turmas', turma.id]">
+            Abrir turma
+            <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+          </a>
+        </mat-card-actions>
+      </mat-card>
+    }
+  </div>
+}

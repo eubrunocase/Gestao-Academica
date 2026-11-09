@@ -1,0 +1,369 @@
+/* ==========================================================================
+   Tema e estilos globais — Sistema de Gestão Acadêmica (UCSAL)
+   ========================================================================== */
+
+:root {
+  --ga-primary: #0b3d91;
+  --ga-primary-dark: #072a63;
+  --ga-primary-light: #e8eefb;
+  --ga-accent: #0f7b6c;
+  --ga-warn: #b3261e;
+  --ga-warn-bg: #fdecea;
+  --ga-alert: #8a5a00;
+  --ga-alert-bg: #fff4d6;
+  --ga-success: #1b6b3a;
+  --ga-success-bg: #e7f5ec;
+  --ga-surface: #ffffff;
+  --ga-bg: #f4f6fb;
+  --ga-border: #dbe1ee;
+  --ga-text: #1b1f2a;
+  --ga-text-muted: #586174;
+
+  /* Ajustes de cor sobre o tema Material (M3) */
+  --mat-sys-primary: #0b3d91;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #dbe5fb;
+  --mat-sys-on-primary-container: #072a63;
+  --mat-sys-secondary: #0f7b6c;
+  --mat-sys-on-secondary: #ffffff;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: var(--ga-text);
+  background: var(--ga-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  line-height: 1.25;
+}
+
+p {
+  line-height: 1.55;
+}
+
+a {
+  color: var(--ga-primary);
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Layout de páginas ------------------------------------------------------- */
+.page {
+  padding: 24px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.page-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.muted {
+  color: var(--ga-text-muted);
+}
+
+.small {
+  font-size: 0.8rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 8px 0 12px;
+}
+
+/* Cartões ---------------------------------------------------------------- */
+.mat-mdc-card {
+  border-radius: 16px !important;
+  border: 1px solid var(--ga-border);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 6px 20px rgba(16, 24, 40, 0.04) !important;
+}
+
+/* Alertas e badges ------------------------------------------------------- */
+.alert {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border-radius: 12px;
+  padding: 14px 16px;
+  border: 1px solid transparent;
+}
+
+.alert mat-icon {
+  flex: 0 0 auto;
+}
+
+.alert-warning {
+  color: var(--ga-alert);
+  background: var(--ga-alert-bg);
+  border-color: #efd99a;
+}
+
+.alert-danger {
+  color: var(--ga-warn);
+  background: var(--ga-warn-bg);
+  border-color: #f3b8b3;
+}
+
+.alert-success {
+  color: var(--ga-success);
+  background: var(--ga-success-bg);
+  border-color: #b8e0c6;
+}
+
+.alert-info {
+  color: var(--ga-primary-dark);
+  background: var(--ga-primary-light);
+  border-color: #c4d4f5;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.badge-success {
+  color: var(--ga-success);
+  background: var(--ga-success-bg);
+  border-color: #b8e0c6;
+}
+
+.badge-warning {
+  color: var(--ga-alert);
+  background: var(--ga-alert-bg);
+  border-color: #efd99a;
+}
+
+.badge-danger {
+  color: var(--ga-warn);
+  background: var(--ga-warn-bg);
+  border-color: #f3b8b3;
+}
+
+.badge-neutral {
+  color: var(--ga-text-muted);
+  background: #eef1f6;
+  border-color: #dbe1ee;
+}
+
+/* Tabelas ---------------------------------------------------------------- */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table.mat-mdc-table {
+  width: 100%;
+  min-width: 640px;
+  background: transparent;
+}
+
+th.mat-mdc-header-cell {
+  font-weight: 600;
+  color: var(--ga-text-muted);
+  white-space: nowrap;
+}
+
+td.mat-mdc-cell,
+th.mat-mdc-header-cell {
+  padding: 10px 12px !important;
+}
+
+.table-empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--ga-text-muted);
+}
+
+/* Formulários ------------------------------------------------------------ */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 4px 16px;
+}
+
+.form-grid .span-2 {
+  grid-column: 1 / -1;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.form-error {
+  color: var(--ga-warn);
+  background: var(--ga-warn-bg);
+  border: 1px solid #f3b8b3;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 8px 0;
+  font-size: 0.875rem;
+}
+
+/* Frequência ------------------------------------------------------------- */
+.frequencia-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(180px, 2fr) auto;
+  align-items: center;
+  gap: 16px;
+}
+
+.frequencia-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: #e6eaf2;
+  overflow: hidden;
+}
+
+.frequencia-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.4s ease;
+}
+
+.frequencia-ok > span {
+  background: #1b6b3a;
+}
+
+.frequencia-alerta > span {
+  background: #c47f00;
+}
+
+.frequencia-risco > span {
+  background: #b3261e;
+}
+
+/* Acessibilidade --------------------------------------------------------- */
+:focus-visible {
+  outline: 3px solid #1a73e8;
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 1000;
+  background: #fff;
+  color: var(--ga-primary);
+  padding: 10px 16px;
+  border-radius: 0 0 8px 0;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Responsividade --------------------------------------------------------- */
+@media (max-width: 700px) {
+  .page {
+    padding: 16px;
+  }
+
+  .frequencia-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* Impressão -------------------------------------------------------------- */
+@media print {
+  body {
+    background: #fff;
+  }
+
+  .print-hide,
+  mat-toolbar,
+  mat-sidenav,
+  mat-sidenav-container > .mat-drawer-backdrop,
+  .chatbot-fab,
+  .chatbot-panel {
+    display: none !important;
+  }
+
+  .page {
+    padding: 0;
+    max-width: none;
+  }
+
+  .mat-mdc-card {
+    box-shadow: none !important;
+    border: 1px solid #999;
+    break-inside: avoid;
+  }
+
+  table.mat-mdc-table {
+    min-width: 0;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}

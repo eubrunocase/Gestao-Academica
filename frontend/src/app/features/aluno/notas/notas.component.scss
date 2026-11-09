@@ -1,0 +1,65 @@
+.boletins {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.titulo-disciplina {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.titulo-disciplina strong {
+  font-size: 1rem;
+}
+
+.resumo-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+}
+
+.painel-conteudo {
+  display: grid;
+  gap: 16px;
+  padding: 8px 4px 16px;
+}
+
+.resumo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.resumo-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f6f8fd;
+  border: 1px solid var(--ga-border);
+}
+
+.resumo-item span {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ga-text-muted);
+  font-weight: 600;
+}
+
+.resumo-item strong {
+  font-size: 1.05rem;
+  color: var(--ga-text);
+}
+
+@media (max-width: 700px) {
+  .resumo-header {
+    gap: 6px;
+  }
+}

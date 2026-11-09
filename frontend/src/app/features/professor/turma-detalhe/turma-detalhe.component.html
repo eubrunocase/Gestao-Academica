@@ -1,0 +1,265 @@
+@if (turma(); as dados) {
+  <app-page-header
+    [titulo]="dados.disciplina.nome"
+    [subtitulo]="dados.professor.nome + ' · ' + dados.periodoLetivo + ' · ' + dados.disciplina.cargaHoraria + 'h'"
+  >
+    <a mat-stroked-button routerLink="/professor/turmas" class="print-hide">
+      <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      Minhas turmas
+    </a>
+    <span class="badge" [class]="dados.encerrada ? 'badge badge-neutral' : 'badge badge-success'">
+      {{ dados.encerrada ? 'Turma encerrada' : 'Turma em andamento' }}
+    </span>
+  </app-page-header>
+} @else {
+  <app-page-header titulo="Detalhe da turma" subtitulo="Carregando informações…">
+    <a mat-stroked-button routerLink="/professor/turmas">
+      <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      Minhas turmas
+    </a>
+  </app-page-header>
+}
+
+@if (carregandoTurma()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Carregando turma" />
+}
+
+@if (erro()) {
+  <div class="alert alert-danger" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <span>{{ erro() }}</span>
+  </div>
+}
+
+@if (turma(); as dados) {
+  <section class="resumo-turma">
+    <div>
+      <mat-icon aria-hidden="true">groups</mat-icon>
+      <span><strong>{{ dados.vagasOcupadas }}</strong> matriculados</span>
+    </div>
+    <div>
+      <mat-icon aria-hidden="true">event_seat</mat-icon>
+      <span><strong>{{ dados.vagasDisponiveis }}</strong> vagas livres</span>
+    </div>
+    <div>
+      <mat-icon aria-hidden="true">format_list_numbered</mat-icon>
+      <span>Limite de <strong>{{ dados.limiteVagas }}</strong> vagas</span>
+    </div>
+  </section>
+
+  <mat-tab-group
+    class="abas-turma"
+    [selectedIndex]="aba()"
+    (selectedIndexChange)="aoMudarAba($event)"
+    animationDuration="200ms"
+  >
+    <mat-tab label="Alunos">
+      @if (aba() === 0) {
+        <mat-card class="aba-card">
+          <mat-card-header>
+            <mat-card-title>Alunos matriculados</mat-card-title>
+            <mat-card-subtitle>{{ alunos().length }} aluno(s) na turma</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            @if (carregandoAlunos()) {
+              <mat-progress-bar mode="indeterminate" aria-label="Carregando alunos" />
+            }
+            @if (alunos().length === 0) {
+              <app-empty-state
+                titulo="Nenhum aluno matriculado"
+                mensagem="A turma ainda não possui alunos."
+                icone="groups"
+              />
+            } @else {
+              <div class="table-container">
+                <table mat-table [dataSource]="alunos()">
+                  <ng-container matColumnDef="nome">
+                    <th mat-header-cell *matHeaderCellDef>Nome</th>
+                    <td mat-cell *matCellDef="let aluno"><strong>{{ aluno.nome }}</strong></td>
+                  </ng-container>
+                  <ng-container matColumnDef="matricula">
+                    <th mat-header-cell *matHeaderCellDef>Matrícula</th>
+                    <td mat-cell *matCellDef="let aluno">{{ aluno.numeroMatricula }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="email">
+                    <th mat-header-cell *matHeaderCellDef>E-mail</th>
+                    <td mat-cell *matCellDef="let aluno">{{ aluno.email }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Situação</th>
+                    <td mat-cell *matCellDef="let aluno">
+                      <span class="badge" [class]="'badge ' + classeStatus(aluno.status)">
+                        {{ rotuloStatus(aluno.status) }}
+                      </span>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="colunasAlunos"></tr>
+                  <tr mat-row *matRowDef="let row; columns: colunasAlunos"></tr>
+                </table>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+    </mat-tab>
+
+    <mat-tab label="Avaliações e notas">
+      @if (aba() === 1) {
+        <app-lancar-notas [turmaId]="dados.id" [encerrada]="dados.encerrada" />
+      }
+    </mat-tab>
+
+    <mat-tab label="Frequência">
+      @if (aba() === 2) {
+        <app-registrar-frequencia [turmaId]="dados.id" />
+      }
+    </mat-tab>
+
+    <mat-tab label="Avisos">
+      @if (aba() === 3) {
+        <div class="aba-grid">
+          <mat-card class="aba-card">
+            <mat-card-header>
+              <mat-card-title>Novo aviso para a turma</mat-card-title>
+              <mat-card-subtitle>O comunicado será visível apenas para esta turma.</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="formAviso" (ngSubmit)="criarAviso()" class="form-aviso">
+                <mat-form-field appearance="outline">
+                  <mat-label>Título</mat-label>
+                  <input matInput formControlName="titulo" maxlength="160" />
+                  @if (formAviso.controls.titulo.hasError('required')) {
+                    <mat-error>Informe o título.</mat-error>
+                  }
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Mensagem</mat-label>
+                  <textarea matInput formControlName="mensagem" rows="4" maxlength="2000"></textarea>
+                  @if (formAviso.controls.mensagem.hasError('required')) {
+                    <mat-error>Informe a mensagem.</mat-error>
+                  }
+                </mat-form-field>
+                <button mat-flat-button color="primary" type="submit" [disabled]="salvandoAviso()">
+                  <mat-icon aria-hidden="true">campaign</mat-icon>
+                  {{ salvandoAviso() ? 'Publicando…' : 'Publicar aviso' }}
+                </button>
+              </form>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="aba-card">
+            <mat-card-header>
+              <mat-card-title>Avisos da turma</mat-card-title>
+              <mat-card-subtitle>Comunicados publicados para esta turma</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              @if (carregandoAvisos()) {
+                <mat-progress-bar mode="indeterminate" aria-label="Carregando avisos" />
+              }
+              @if (avisos().length === 0) {
+                <app-empty-state
+                  titulo="Nenhum aviso"
+                  mensagem="Publique o primeiro comunicado desta turma."
+                  icone="campaign"
+                />
+              } @else {
+                <ul class="lista-avisos">
+                  @for (aviso of avisos(); track aviso.id) {
+                    <li>
+                      <strong>{{ aviso.titulo }}</strong>
+                      <p>{{ aviso.mensagem }}</p>
+                      <small class="muted">{{ aviso.autor }} · {{ aviso.criadoEm | dataBr: true }}</small>
+                    </li>
+                  }
+                </ul>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      }
+    </mat-tab>
+
+    <mat-tab label="Relatório">
+      @if (aba() === 4) {
+        @if (carregandoRelatorio()) {
+          <mat-progress-bar mode="indeterminate" aria-label="Carregando relatório" />
+        }
+
+        @if (relatorio(); as resumo) {
+          <div class="acoes-relatorio print-hide">
+            <button mat-stroked-button type="button" [disabled]="exportando()" (click)="exportarRelatorio()">
+              <mat-icon aria-hidden="true">download</mat-icon>
+              {{ exportando() ? 'Exportando…' : 'Exportar CSV' }}
+            </button>
+            <button mat-stroked-button type="button" (click)="imprimir()">
+              <mat-icon aria-hidden="true">print</mat-icon>
+              Imprimir
+            </button>
+          </div>
+
+          <section class="stats-grid" aria-label="Resumo da turma">
+            <app-stat-card
+              rotulo="Média da turma"
+              [valor]="resumo.mediaTurma !== null ? (resumo.mediaTurma | number: '1.2-2') : '—'"
+              icone="trending_up"
+              [tom]="(resumo.mediaTurma ?? 0) >= 7 ? 'sucesso' : 'alerta'"
+            />
+            <app-stat-card rotulo="Total de alunos" [valor]="resumo.totalAlunos" icone="groups" />
+            <app-stat-card rotulo="Aprovados" [valor]="resumo.aprovados" icone="verified" tom="sucesso" />
+            <app-stat-card
+              rotulo="Reprovados"
+              [valor]="resumo.reprovadosNota + resumo.reprovadosFalta"
+              icone="cancel"
+              [tom]="resumo.reprovadosNota + resumo.reprovadosFalta > 0 ? 'risco' : 'padrao'"
+            />
+          </section>
+
+          <mat-card class="aba-card">
+            <mat-card-header>
+              <mat-card-title>Lista de presença, notas e resumo</mat-card-title>
+              <mat-card-subtitle>
+                {{ resumo.disciplina }} · {{ resumo.periodoLetivo }}
+              </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="table-container">
+                <table mat-table [dataSource]="resumo.alunos">
+                  <ng-container matColumnDef="nome">
+                    <th mat-header-cell *matHeaderCellDef>Aluno</th>
+                    <td mat-cell *matCellDef="let aluno">{{ aluno.nome }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="matricula">
+                    <th mat-header-cell *matHeaderCellDef>Matrícula</th>
+                    <td mat-cell *matCellDef="let aluno">{{ aluno.numeroMatricula }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="media">
+                    <th mat-header-cell *matHeaderCellDef>Média</th>
+                    <td mat-cell *matCellDef="let aluno">
+                      {{ aluno.media !== null ? (aluno.media | number: '1.2-2') : '—' }}
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="frequencia">
+                    <th mat-header-cell *matHeaderCellDef>Frequência</th>
+                    <td mat-cell *matCellDef="let aluno">
+                      {{ aluno.frequencia | percentual }}
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="situacao">
+                    <th mat-header-cell *matHeaderCellDef>Situação</th>
+                    <td mat-cell *matCellDef="let aluno">
+                      <span class="badge" [class]="'badge ' + classeStatus(aluno.situacao)">
+                        {{ rotuloStatus(aluno.situacao) }}
+                      </span>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="colunasRelatorio"></tr>
+                  <tr mat-row *matRowDef="let row; columns: colunasRelatorio"></tr>
+                </table>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      }
+    </mat-tab>
+  </mat-tab-group>
+}

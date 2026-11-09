@@ -1,0 +1,103 @@
+.busca-card {
+  margin-bottom: 20px;
+}
+
+.form-protocolo {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.form-protocolo mat-form-field {
+  flex: 1 1 320px;
+}
+
+.form-protocolo button {
+  margin-top: 8px;
+}
+
+.detalhe-card mat-card-content {
+  padding-top: 12px;
+}
+
+.resumo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.resumo > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--ga-border);
+  border-radius: 12px;
+  background: #f6f8fd;
+}
+
+.resumo > div > span:first-child {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ga-text-muted);
+  font-weight: 600;
+}
+
+.descricao p {
+  white-space: pre-wrap;
+  margin: 4px 0 20px;
+}
+
+.linha-tempo ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+
+.linha-tempo li {
+  display: flex;
+  gap: 14px;
+  padding-bottom: 18px;
+  position: relative;
+}
+
+.linha-tempo li:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 18px;
+  bottom: 0;
+  width: 2px;
+  background: var(--ga-border);
+}
+
+.marcador {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ga-primary);
+  flex: 0 0 auto;
+  margin-top: 2px;
+  box-shadow: 0 0 0 3px var(--ga-primary-light);
+}
+
+.andamento-conteudo {
+  flex: 1 1 auto;
+}
+
+.andamento-topo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.andamento-conteudo p {
+  margin: 4px 0;
+  white-space: pre-wrap;
+}

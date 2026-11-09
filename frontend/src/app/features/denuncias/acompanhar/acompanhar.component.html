@@ -1,0 +1,99 @@
+<app-page-header
+  titulo="Acompanhar denúncia"
+  subtitulo="Consulte o status e a linha do tempo usando o protocolo recebido no registro."
+/>
+
+<mat-card class="busca-card">
+  <mat-card-content>
+    <form [formGroup]="form" (ngSubmit)="consultar()" class="form-protocolo">
+      <mat-form-field appearance="outline">
+        <mat-label>Protocolo</mat-label>
+        <input matInput formControlName="protocolo" placeholder="Ex.: DEN-2026-0001" autocomplete="off" />
+        <mat-icon matPrefix aria-hidden="true">confirmation_number</mat-icon>
+        @if (form.controls.protocolo.hasError('required')) {
+          <mat-error>Informe o protocolo.</mat-error>
+        }
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="submit" [disabled]="carregando()">
+        <mat-icon aria-hidden="true">search</mat-icon>
+        {{ carregando() ? 'Consultando…' : 'Consultar' }}
+      </button>
+    </form>
+  </mat-card-content>
+</mat-card>
+
+@if (carregando()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Consultando denúncia" />
+}
+
+@if (erro()) {
+  <div class="alert alert-danger" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <span>{{ erro() }}</span>
+  </div>
+}
+
+@if (denuncia(); as dados) {
+  <mat-card class="detalhe-card">
+    <mat-card-header>
+      <mat-card-title>Protocolo {{ dados.protocolo }}</mat-card-title>
+      <mat-card-subtitle>
+        Registrada em {{ dados.criadoEm | dataBr: true }}
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="resumo">
+        <div>
+          <span>Status atual</span>
+          <span class="badge" [class]="'badge ' + classeStatus(dados)">
+            {{ rotuloStatus[dados.status] }}
+          </span>
+        </div>
+        <div>
+          <span>Categoria</span>
+          <strong>{{ dados.categoria }}</strong>
+        </div>
+        <div>
+          <span>Anônima</span>
+          <strong>{{ dados.anonima ? 'Sim' : 'Não' }}</strong>
+        </div>
+        <div>
+          <span>Data aproximada</span>
+          <strong>{{ dados.dataAproximada | dataBr }}</strong>
+        </div>
+      </div>
+
+      <section class="descricao" aria-label="Descrição da denúncia">
+        <h3>Descrição</h3>
+        <p>{{ dados.descricao }}</p>
+      </section>
+
+      <section class="linha-tempo" aria-label="Linha do tempo da denúncia">
+        <h3>Linha do tempo</h3>
+        @if (dados.andamentos.length === 0) {
+          <app-empty-state
+            titulo="Nenhum andamento registrado"
+            mensagem="A denúncia foi recebida e aguarda triagem."
+            icone="schedule"
+          />
+        } @else {
+          <ol>
+            @for (andamento of dados.andamentos; track andamento.id) {
+              <li>
+                <span class="marcador" aria-hidden="true"></span>
+                <div class="andamento-conteudo">
+                  <div class="andamento-topo">
+                    <strong>{{ andamento.etapa }}</strong>
+                    <span class="small muted">{{ andamento.criadoEm | dataBr: true }}</span>
+                  </div>
+                  <p>{{ andamento.descricao }}</p>
+                  <span class="small muted">Por {{ andamento.autor }}</span>
+                </div>
+              </li>
+            }
+          </ol>
+        }
+      </section>
+    </mat-card-content>
+  </mat-card>
+}

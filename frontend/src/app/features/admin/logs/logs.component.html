@@ -1,0 +1,181 @@
+<app-page-header
+  titulo="Logs de segurança e auditoria"
+  subtitulo="Eventos de autenticação, acessos negados e ações administrativas."
+>
+  <button mat-stroked-button type="button" (click)="carregarSeguranca(paginaSeguranca()); carregarAuditoria(paginaAuditoria())">
+    <mat-icon aria-hidden="true">refresh</mat-icon>
+    Atualizar
+  </button>
+</app-page-header>
+
+<mat-tab-group animationDuration="200ms">
+  <mat-tab label="Segurança">
+    <mat-card class="aba-card">
+      <mat-card-header>
+        <mat-card-title>Logs de segurança</mat-card-title>
+        <mat-card-subtitle>{{ totalSeguranca() }} evento(s) registrados</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        @if (carregandoSeguranca()) {
+          <mat-progress-bar mode="indeterminate" aria-label="Carregando logs de segurança" />
+        }
+        @if (erroSeguranca()) {
+          <div class="alert alert-danger" role="alert">
+            <mat-icon aria-hidden="true">error</mat-icon>
+            <span>{{ erroSeguranca() }}</span>
+          </div>
+        }
+
+        <div class="filtros">
+          <mat-form-field appearance="outline">
+            <mat-label>Evento</mat-label>
+            <mat-select [formControl]="eventoFiltro">
+              <mat-option value="">Todos</mat-option>
+              @for (evento of eventos; track evento) {
+                <mat-option [value]="evento">{{ rotuloEvento[evento] }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>IP</mat-label>
+            <input matInput [formControl]="ipFiltro" placeholder="Filtrar por IP" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Data</mat-label>
+            <input matInput type="date" [formControl]="dataSeguranca" />
+          </mat-form-field>
+          <button mat-button type="button" (click)="limparSeguranca()">Limpar</button>
+        </div>
+
+        @if (segurancaFiltrada().length === 0 && !carregandoSeguranca()) {
+          <app-empty-state
+            titulo="Nenhum log encontrado"
+            mensagem="Ajuste os filtros ou aguarde novos eventos."
+            icone="security"
+          />
+        } @else {
+          <div class="table-container">
+            <table mat-table [dataSource]="segurancaFiltrada()">
+              <ng-container matColumnDef="usuario">
+                <th mat-header-cell *matHeaderCellDef>Usuário</th>
+                <td mat-cell *matCellDef="let log">{{ log.usuario || '—' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="evento">
+                <th mat-header-cell *matHeaderCellDef>Evento</th>
+                <td mat-cell *matCellDef="let log">
+                  <span class="badge" [class]="'badge ' + classeEvento(log.evento)">
+                    {{ rotuloDoEvento(log.evento) }}
+                  </span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="ip">
+                <th mat-header-cell *matHeaderCellDef>IP</th>
+                <td mat-cell *matCellDef="let log">{{ log.ip }}</td>
+              </ng-container>
+              <ng-container matColumnDef="criadoEm">
+                <th mat-header-cell *matHeaderCellDef>Data/hora</th>
+                <td mat-cell *matCellDef="let log">{{ log.criadoEm | dataBr: true }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="colunasSeguranca"></tr>
+              <tr mat-row *matRowDef="let row; columns: colunasSeguranca"></tr>
+            </table>
+          </div>
+        }
+
+        <mat-paginator
+          [length]="totalSeguranca()"
+          [pageSize]="tamanho()"
+          [pageSizeOptions]="[30, 50, 100]"
+          [pageIndex]="paginaSeguranca()"
+          (page)="paginarSeguranca($event)"
+          aria-label="Paginação de logs de segurança"
+        />
+      </mat-card-content>
+    </mat-card>
+  </mat-tab>
+
+  <mat-tab label="Auditoria">
+    <mat-card class="aba-card">
+      <mat-card-header>
+        <mat-card-title>Logs de auditoria</mat-card-title>
+        <mat-card-subtitle>{{ totalAuditoria() }} ação(ões) registradas</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        @if (carregandoAuditoria()) {
+          <mat-progress-bar mode="indeterminate" aria-label="Carregando logs de auditoria" />
+        }
+        @if (erroAuditoria()) {
+          <div class="alert alert-danger" role="alert">
+            <mat-icon aria-hidden="true">error</mat-icon>
+            <span>{{ erroAuditoria() }}</span>
+          </div>
+        }
+
+        <div class="filtros">
+          <mat-form-field appearance="outline">
+            <mat-label>Ação</mat-label>
+            <input matInput [formControl]="acaoFiltro" placeholder="Ex.: CRIAR, EDITAR" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Usuário</mat-label>
+            <input matInput [formControl]="usuarioAuditoria" placeholder="Nome do usuário" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Data</mat-label>
+            <input matInput type="date" [formControl]="dataAuditoria" />
+          </mat-form-field>
+          <button mat-button type="button" (click)="limparAuditoria()">Limpar</button>
+        </div>
+
+        @if (auditoriaFiltrada().length === 0 && !carregandoAuditoria()) {
+          <app-empty-state
+            titulo="Nenhum log encontrado"
+            mensagem="Ajuste os filtros ou aguarde novas ações."
+            icone="receipt_long"
+          />
+        } @else {
+          <div class="table-container">
+            <table mat-table [dataSource]="auditoriaFiltrada()">
+              <ng-container matColumnDef="usuario">
+                <th mat-header-cell *matHeaderCellDef>Usuário</th>
+                <td mat-cell *matCellDef="let log">{{ log.usuario || '—' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="acao">
+                <th mat-header-cell *matHeaderCellDef>Ação</th>
+                <td mat-cell *matCellDef="let log"><strong>{{ log.acao }}</strong></td>
+              </ng-container>
+              <ng-container matColumnDef="entidade">
+                <th mat-header-cell *matHeaderCellDef>Entidade</th>
+                <td mat-cell *matCellDef="let log">
+                  {{ log.entidade }}
+                  @if (log.entidadeId !== null) {
+                    <span class="muted small">#{{ log.entidadeId }}</span>
+                  }
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="detalhe">
+                <th mat-header-cell *matHeaderCellDef>Detalhe</th>
+                <td mat-cell *matCellDef="let log">{{ log.detalhe || '—' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="criadoEm">
+                <th mat-header-cell *matHeaderCellDef>Data/hora</th>
+                <td mat-cell *matCellDef="let log">{{ log.criadoEm | dataBr: true }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="colunasAuditoria"></tr>
+              <tr mat-row *matRowDef="let row; columns: colunasAuditoria"></tr>
+            </table>
+          </div>
+        }
+
+        <mat-paginator
+          [length]="totalAuditoria()"
+          [pageSize]="tamanho()"
+          [pageSizeOptions]="[30, 50, 100]"
+          [pageIndex]="paginaAuditoria()"
+          (page)="paginarAuditoria($event)"
+          aria-label="Paginação de logs de auditoria"
+        />
+      </mat-card-content>
+    </mat-card>
+  </mat-tab>
+</mat-tab-group>

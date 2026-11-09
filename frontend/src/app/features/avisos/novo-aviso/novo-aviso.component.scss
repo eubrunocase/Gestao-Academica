@@ -1,0 +1,17 @@
+.form-aviso {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 4px 16px;
+  padding-top: 8px;
+}
+
+.form-aviso .span-2 {
+  grid-column: 1 / -1;
+}
+
+.acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}

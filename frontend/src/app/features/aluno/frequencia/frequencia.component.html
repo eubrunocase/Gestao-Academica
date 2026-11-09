@@ -1,0 +1,105 @@
+<app-page-header
+  titulo="Frequência"
+  subtitulo="Acompanhe presenças, faltas e o risco de reprovação por frequência."
+>
+  <button mat-stroked-button type="button" (click)="carregar()">
+    <mat-icon aria-hidden="true">refresh</mat-icon>
+    Atualizar
+  </button>
+</app-page-header>
+
+@if (carregando()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Carregando frequência" />
+}
+
+@if (erro()) {
+  <div class="alert alert-danger" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <span>{{ erro() }}</span>
+  </div>
+}
+
+@if (emRisco().length > 0) {
+  <div class="alert alert-warning" role="alert">
+    <mat-icon aria-hidden="true">warning</mat-icon>
+    <div>
+      <strong>Atenção: frequência em risco</strong>
+      <p>
+        {{ emRisco().length }} disciplina(s) estão próximas ou abaixo do limite
+        mínimo de 75%. Verifique os detalhes abaixo e procure a Secretaria
+        Acadêmica se precisar regularizar faltas.
+      </p>
+    </div>
+  </div>
+}
+
+@if (!carregando() && frequencias().length === 0) {
+  <mat-card>
+    <app-empty-state
+      titulo="Sem registros de frequência"
+      mensagem="A frequência aparecerá aqui após o lançamento das aulas pelos professores."
+      icone="fact_check"
+    />
+  </mat-card>
+} @else {
+  <div class="cards-grid frequencia-grid">
+    @for (item of frequencias(); track item.matriculaId) {
+      <mat-card class="frequencia-card">
+        <mat-card-header>
+          <mat-card-title>{{ item.disciplina }}</mat-card-title>
+          <mat-card-subtitle>
+            {{ item.professor }} · {{ item.periodoLetivo }}
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="cabecalho-frequencia">
+            <div>
+              <span class="valor-percentual">{{ item.percentual | percentual }}</span>
+              <span class="small muted">de presença</span>
+            </div>
+            <app-frequencia-badge [percentual]="item.percentual" [minimo]="item.frequenciaMinima" />
+          </div>
+
+          <div
+            class="frequencia-bar"
+            [class]="'frequencia-bar ' + classeBarra(item.percentual, item.frequenciaMinima)"
+            role="img"
+            [attr.aria-label]="'Frequência de ' + (item.percentual | percentual) + ' na disciplina ' + item.disciplina"
+          >
+            <span [style.width.%]="item.percentual ?? 0"></span>
+          </div>
+
+          <div class="detalhes">
+            <div>
+              <strong>{{ item.presencas }}</strong>
+              <span>presenças</span>
+            </div>
+            <div>
+              <strong>{{ item.faltas }}</strong>
+              <span>faltas</span>
+            </div>
+            <div>
+              <strong>{{ item.totalAulas }}</strong>
+              <span>aulas</span>
+            </div>
+            <div>
+              <strong>{{ item.frequenciaMinima }}%</strong>
+              <span>mínimo</span>
+            </div>
+          </div>
+
+          @if (item.alerta) {
+            <div class="alert alert-warning risco-disciplina" role="alert">
+              <mat-icon aria-hidden="true">error_outline</mat-icon>
+              <span>
+                Frequência abaixo ou próxima do limite. Faltam
+                {{ item.faltas }} falta(s) em {{ item.totalAulas }} aula(s).
+              </span>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+}

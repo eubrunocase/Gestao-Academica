@@ -1,0 +1,24 @@
+.aviso-prazo {
+  margin-bottom: 20px;
+}
+
+.bloco {
+  margin-bottom: 20px;
+}
+
+.bloco mat-card-content {
+  padding-top: 12px;
+}
+
+.vagas {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+}
+
+@media (max-width: 700px) {
+  .aviso-prazo {
+    font-size: 0.84rem;
+  }
+}

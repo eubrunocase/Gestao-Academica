@@ -1,0 +1,60 @@
+.frequencia-grid {
+  margin-top: 18px;
+}
+
+.frequencia-card {
+  height: 100%;
+}
+
+.cabecalho-frequencia {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.valor-percentual {
+  display: block;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--ga-primary-dark);
+  line-height: 1.1;
+}
+
+.detalhes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.detalhes div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 4px;
+  border-radius: 10px;
+  background: #f6f8fd;
+}
+
+.detalhes strong {
+  font-size: 1rem;
+}
+
+.detalhes span {
+  font-size: 0.68rem;
+  color: var(--ga-text-muted);
+  text-align: center;
+}
+
+.risco-disciplina {
+  margin-top: 14px;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 520px) {
+  .detalhes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

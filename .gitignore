@@ -1,0 +1,35 @@
+# Especificacoes fornecidas (nao versionar)
+
+
+# Java / Maven
+backend/target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+
+# Angular / Node
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+npm-debug.log*
+yarn-error.log*
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Ambiente e segredos
+.env**
+.env.local
+
+# Logs e arquivos temporarios
+*.log
+*.tmp
+
+# macOS
+.DS_Store
+SPEC**

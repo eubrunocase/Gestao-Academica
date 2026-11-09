@@ -1,0 +1,187 @@
+<app-page-header
+  titulo="Indicadores de desempenho"
+  subtitulo="Médias, aprovação, reprovação, frequência e alunos em risco."
+>
+  <button mat-stroked-button type="button" (click)="recarregar()">
+    <mat-icon aria-hidden="true">refresh</mat-icon>
+    Atualizar
+  </button>
+</app-page-header>
+
+@if (carregando()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Carregando indicadores" />
+}
+
+@if (erro()) {
+  <div class="alert alert-danger" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <span>{{ erro() }}</span>
+  </div>
+}
+
+<section class="stats-grid">
+  <app-stat-card
+    rotulo="Média geral"
+    [valor]="mediaGeral() !== null ? (mediaGeral() | number: '1.2-2') : '—'"
+    icone="trending_up"
+    [tom]="(mediaGeral() ?? 0) >= 7 ? 'sucesso' : 'alerta'"
+  />
+  <app-stat-card
+    rotulo="Taxa média de aprovação"
+    [valor]="taxaAprovacao() | percentual"
+    icone="verified"
+    tom="sucesso"
+  />
+  <app-stat-card
+    rotulo="Disciplinas avaliadas"
+    [valor]="disciplinas().length"
+    icone="menu_book"
+  />
+  <app-stat-card
+    rotulo="Matrículas em andamento"
+    [valor]="emAndamento()"
+    icone="pending_actions"
+  />
+</section>
+
+@if (disciplinas().length === 0 && !carregando()) {
+  <mat-card class="bloco">
+    <app-empty-state
+      titulo="Sem dados de indicadores"
+      mensagem="Ainda não há disciplinas com matrículas avaliadas."
+      icone="monitoring"
+    />
+  </mat-card>
+} @else {
+  <div class="graficos-grid">
+    <mat-card class="grafico-card">
+      <mat-card-header>
+        <mat-card-title>Média por disciplina</mat-card-title>
+        <mat-card-subtitle>Média ponderada das avaliações lançadas</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="chart-box">
+          <canvas
+            baseChart
+            type="bar"
+            [data]="barData()"
+            [options]="barOptions"
+            aria-label="Gráfico de barras com a média por disciplina"
+            role="img"
+          ></canvas>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="grafico-card">
+      <mat-card-header>
+        <mat-card-title>Aprovação e reprovação</mat-card-title>
+        <mat-card-subtitle>Distribuição consolidada por situação</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="chart-box">
+          <canvas
+            baseChart
+            type="doughnut"
+            [data]="pizzaData()"
+            [options]="pizzaOptions"
+            aria-label="Gráfico de rosca com aprovados e reprovados"
+            role="img"
+          ></canvas>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-card class="bloco">
+    <mat-card-header>
+      <mat-card-title>Indicadores por turma</mat-card-title>
+      <mat-card-subtitle>Dispersão frequência × nota e evolução por avaliação</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-form-field appearance="outline" class="seletor-turma">
+        <mat-label>Turma</mat-label>
+        <mat-select [formControl]="turmaSelecionada">
+          @for (turma of turmas(); track turma.id) {
+            <mat-option [value]="turma.id">
+              {{ turma.disciplina.nome }} — {{ turma.periodoLetivo }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @if (carregandoTurma()) {
+        <mat-progress-bar mode="indeterminate" aria-label="Carregando indicadores da turma" />
+      }
+
+      @if (indicadorTurma(); as indicador) {
+        <div class="graficos-grid interna">
+          <div class="chart-card">
+            <h3>Frequência × média</h3>
+            <div class="chart-box">
+              <canvas
+                baseChart
+                type="scatter"
+                [data]="scatterData()"
+                [options]="scatterOptions"
+                aria-label="Gráfico de dispersão entre frequência e média dos alunos"
+                role="img"
+              ></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h3>Evolução por avaliação</h3>
+            <div class="chart-box">
+              <canvas
+                baseChart
+                type="bar"
+                [data]="evolucaoData()"
+                [options]="evolucaoOptions"
+                aria-label="Gráfico de barras com a média da turma por avaliação"
+                role="img"
+              ></canvas>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="section-title">Alunos em risco</h3>
+        @if (alunosRisco().length === 0) {
+          <div class="alert alert-success" role="status">
+            <mat-icon aria-hidden="true">check_circle</mat-icon>
+            <span>Nenhum aluno com média abaixo de 7 ou frequência abaixo de 75% nesta turma.</span>
+          </div>
+        } @else {
+          <div class="table-container">
+            <table mat-table [dataSource]="alunosRisco()">
+              <ng-container matColumnDef="nome">
+                <th mat-header-cell *matHeaderCellDef>Aluno</th>
+                <td mat-cell *matCellDef="let aluno"><strong>{{ aluno.nome }}</strong></td>
+              </ng-container>
+              <ng-container matColumnDef="media">
+                <th mat-header-cell *matHeaderCellDef>Média</th>
+                <td mat-cell *matCellDef="let aluno">
+                  {{ aluno.media !== null ? (aluno.media | number: '1.2-2') : '—' }}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="frequencia">
+                <th mat-header-cell *matHeaderCellDef>Frequência</th>
+                <td mat-cell *matCellDef="let aluno">
+                  <app-frequencia-badge [percentual]="aluno.frequencia" />
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="colunasRisco"></tr>
+              <tr mat-row *matRowDef="let row; columns: colunasRisco"></tr>
+            </table>
+          </div>
+        }
+      } @else if (!carregandoTurma()) {
+        <app-empty-state
+          titulo="Sem indicadores para a turma"
+          mensagem="Selecione outra turma ou aguarde o lançamento de notas e frequência."
+          icone="insights"
+        />
+      }
+    </mat-card-content>
+  </mat-card>
+}

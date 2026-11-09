@@ -1,0 +1,170 @@
+@if (carregando()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Carregando notas da turma" />
+}
+
+@if (erro()) {
+  <div class="alert alert-danger" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <span>{{ erro() }}</span>
+  </div>
+}
+
+@if (encerrada()) {
+  <div class="alert alert-warning" role="alert">
+    <mat-icon aria-hidden="true">lock</mat-icon>
+    <span>
+      Turma encerrada: a edição de notas está desabilitada. Ajustes após o
+      encerramento devem ser solicitados à Coordenação ou à Secretaria.
+    </span>
+  </div>
+}
+
+<mat-card class="bloco">
+  <mat-card-header>
+    <mat-card-title>Avaliações</mat-card-title>
+    <mat-card-subtitle>Defina as avaliações e os pesos usados no cálculo da média.</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    @if (avaliacoes().length === 0) {
+      <app-empty-state
+        titulo="Nenhuma avaliação cadastrada"
+        mensagem="Crie a primeira avaliação para começar a lançar notas."
+        icone="assignment"
+      />
+    } @else {
+      <ul class="lista-avaliacoes">
+        @for (avaliacao of avaliacoes(); track avaliacao.id) {
+          <li>
+            <div>
+              <strong>{{ avaliacao.descricao }}</strong>
+              <span class="muted small">Peso {{ avaliacao.peso }}</span>
+            </div>
+            @if (!encerrada()) {
+              <button
+                mat-icon-button
+                type="button"
+                color="warn"
+                [attr.aria-label]="'Excluir avaliação ' + avaliacao.descricao"
+                (click)="excluirAvaliacao(avaliacao)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
+          </li>
+        }
+      </ul>
+    }
+
+    @if (!encerrada()) {
+      <form [formGroup]="formAvaliacao" (ngSubmit)="criarAvaliacao()" class="form-avaliacao">
+        <mat-form-field appearance="outline">
+          <mat-label>Descrição da avaliação</mat-label>
+          <input matInput formControlName="descricao" maxlength="120" placeholder="Ex.: Prova 3" />
+          @if (formAvaliacao.controls.descricao.hasError('required')) {
+            <mat-error>Informe a descrição.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="campo-peso">
+          <mat-label>Peso</mat-label>
+          <input matInput type="number" min="0.1" step="0.1" formControlName="peso" />
+          @if (formAvaliacao.controls.peso.invalid) {
+            <mat-error>Peso maior que zero.</mat-error>
+          }
+        </mat-form-field>
+
+        <button mat-flat-button color="primary" type="submit" [disabled]="criando()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          {{ criando() ? 'Criando…' : 'Criar avaliação' }}
+        </button>
+      </form>
+    }
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="bloco">
+  <mat-card-header>
+    <mat-card-title>Lançamento de notas</mat-card-title>
+    <mat-card-subtitle>
+      Informe notas de 0 a 10. A média é ponderada pelos pesos das avaliações.
+    </mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    @if (alunos().length === 0) {
+      <app-empty-state
+        titulo="Nenhum aluno matriculado"
+        mensagem="A turma ainda não possui alunos para lançamento de notas."
+        icone="groups"
+      />
+    } @else if (avaliacoes().length === 0) {
+      <app-empty-state
+        titulo="Cadastre uma avaliação"
+        mensagem="É necessário ter ao menos uma avaliação para lançar notas."
+        icone="assignment"
+      />
+    } @else {
+      <div class="table-container">
+        <table class="grade-notas" [formGroup]="formNotas">
+          <thead>
+            <tr>
+              <th scope="col">Aluno</th>
+              @for (avaliacao of avaliacoes(); track avaliacao.id) {
+                <th scope="col">
+                  {{ avaliacao.descricao }}
+                  <small>peso {{ avaliacao.peso }}</small>
+                </th>
+              }
+              <th scope="col">Média</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (aluno of alunos(); track aluno.matriculaId) {
+              <tr>
+                <th scope="row">
+                  <strong>{{ aluno.nome }}</strong>
+                  <small class="muted">{{ aluno.numeroMatricula }}</small>
+                </th>
+                @for (avaliacao of avaliacoes(); track avaliacao.id) {
+                  <td>
+                    <input
+                      class="nota-input"
+                      type="number"
+                      min="0"
+                      max="10"
+                      step="0.1"
+                      [formControlName]="chaveNota(aluno.matriculaId, avaliacao.id)"
+                      [class.invalido]="controle(aluno.matriculaId, avaliacao.id)?.invalid && controle(aluno.matriculaId, avaliacao.id)?.touched"
+                      [attr.aria-label]="'Nota de ' + aluno.nome + ' em ' + avaliacao.descricao"
+                    />
+                    @if (controle(aluno.matriculaId, avaliacao.id)?.invalid && controle(aluno.matriculaId, avaliacao.id)?.touched) {
+                      <span class="erro-campo" role="alert">0–10</span>
+                    }
+                  </td>
+                }
+                <td class="media">
+                  {{ mediaAluno(aluno) !== null ? (mediaAluno(aluno) | number: '1.2-2') : '—' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (!encerrada()) {
+        <div class="acoes-notas">
+          <span class="muted small">Notas vazias não serão enviadas.</span>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            [disabled]="salvando()"
+            (click)="salvar()"
+          >
+            <mat-icon aria-hidden="true">save</mat-icon>
+            {{ salvando() ? 'Salvando…' : 'Salvar notas' }}
+          </button>
+        </div>
+      }
+    }
+  </mat-card-content>
+</mat-card>

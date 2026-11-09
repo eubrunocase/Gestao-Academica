@@ -1,0 +1,8 @@
+gemini:
+  # Perfil usado na demonstracao: se a API do Gemini estiver sem cota,
+  # o chatbot devolve uma resposta padrao em vez de erro 503.
+  fallback-enabled: true
+
+logging:
+  level:
+    br.ucsal.gestaoacademica: DEBUG

@@ -1,0 +1,80 @@
+<app-page-header
+  titulo="Mural de avisos"
+  subtitulo="Comunicados gerais, por curso e por turma."
+>
+  @if (podeCriar()) {
+    <a mat-flat-button color="primary" routerLink="/avisos/novo">
+      <mat-icon aria-hidden="true">add_alert</mat-icon>
+      Novo aviso
+    </a>
+  }
+</app-page-header>
+
+@if (carregando()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Carregando avisos" />
+}
+
+@if (erro()) {
+  <div class="alert alert-danger" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <span>{{ erro() }}</span>
+  </div>
+}
+
+<mat-card class="filtros">
+  <mat-card-content>
+    <div class="form-filtros">
+      <mat-form-field appearance="outline">
+        <mat-label>Buscar aviso</mat-label>
+        <input matInput [formControl]="busca" placeholder="Título, mensagem ou autor" />
+        <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Escopo</mat-label>
+        <mat-select [formControl]="escopoFiltro">
+          <mat-option value="">Todos</mat-option>
+          @for (escopo of escopos; track escopo) {
+            <mat-option [value]="escopo">{{ rotuloEscopo[escopo] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-button type="button" (click)="limparFiltros()">Limpar filtros</button>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+@if (!carregando() && filtrados().length === 0) {
+  <mat-card>
+    <app-empty-state
+      titulo="Nenhum aviso encontrado"
+      mensagem="Ajuste os filtros ou publique um novo comunicado."
+      icone="campaign"
+    >
+      @if (podeCriar()) {
+        <a mat-flat-button color="primary" routerLink="/avisos/novo">Novo aviso</a>
+      }
+    </app-empty-state>
+  </mat-card>
+} @else {
+  <div class="avisos-grid">
+    @for (aviso of filtrados(); track aviso.id) {
+      <mat-card class="aviso-card">
+        <mat-card-header>
+          <mat-card-title>{{ aviso.titulo }}</mat-card-title>
+          <mat-card-subtitle>
+            {{ aviso.autor }} · {{ aviso.criadoEm | dataBr: true }}
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="aviso-meta">
+            <span class="badge badge-neutral">{{ rotuloEscopo[aviso.escopo] }}</span>
+            <span class="small muted">{{ contexto(aviso) }}</span>
+          </div>
+          <p class="mensagem">{{ aviso.mensagem }}</p>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+}

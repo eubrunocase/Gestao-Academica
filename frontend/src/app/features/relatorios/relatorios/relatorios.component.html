@@ -1,0 +1,310 @@
+<app-page-header
+  titulo="Relatórios"
+  subtitulo="Lista da turma, boletim e histórico acadêmico com exportação e impressão."
+>
+  <button
+    mat-stroked-button
+    type="button"
+    class="print-hide"
+    [disabled]="exportando()"
+    (click)="exportar()"
+  >
+    <mat-icon aria-hidden="true">download</mat-icon>
+    {{ exportando() ? 'Exportando…' : 'Exportar' }}
+  </button>
+  <button mat-stroked-button type="button" class="print-hide" (click)="imprimir()">
+    <mat-icon aria-hidden="true">print</mat-icon>
+    Imprimir
+  </button>
+</app-page-header>
+
+@if (carregando()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Carregando relatórios" />
+}
+
+@if (erro()) {
+  <div class="alert alert-danger" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <span>{{ erro() }}</span>
+  </div>
+}
+
+<mat-card class="filtros print-hide">
+  <mat-card-header>
+    <mat-card-title>Filtros do relatório</mat-card-title>
+    <mat-card-subtitle>Escolha o tipo e refine por período, disciplina e turma.</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="form-filtros">
+      <mat-form-field appearance="outline">
+        <mat-label>Tipo de relatório</mat-label>
+        <mat-select [formControl]="tipo">
+          @for (opcao of tipos(); track opcao.valor) {
+            <mat-option [value]="opcao.valor">{{ opcao.rotulo }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Período letivo</mat-label>
+        <mat-select [formControl]="periodoFiltro">
+          <mat-option value="">Todos</mat-option>
+          @for (periodo of periodos(); track periodo) {
+            <mat-option [value]="periodo">{{ periodo }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Disciplina</mat-label>
+        <mat-select [formControl]="disciplinaFiltro">
+          <mat-option value="">Todas</mat-option>
+          @for (disciplina of disciplinas(); track disciplina.id) {
+            <mat-option [value]="disciplina.id">{{ disciplina.nome }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Turma</mat-label>
+        <mat-select [formControl]="turmaSelecionada">
+          @for (turma of turmasFiltradas(); track turma.id) {
+            <mat-option [value]="turma.id">
+              {{ turma.disciplina.nome }} — {{ turma.periodoLetivo }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @if (tipo.value !== 'TURMA') {
+        <mat-form-field appearance="outline">
+          <mat-label>Aluno</mat-label>
+          <mat-select [formControl]="alunoSelecionado">
+            @for (aluno of alunosTurma(); track aluno.alunoId) {
+              <mat-option [value]="aluno.alunoId">
+                {{ aluno.nome }} — {{ aluno.numeroMatricula }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+
+      <button mat-flat-button color="primary" type="button" (click)="gerar()">
+        <mat-icon aria-hidden="true">summarize</mat-icon>
+        Gerar relatório
+      </button>
+    </div>
+
+    @if (carregandoAlunos()) {
+      <p class="muted small">Carregando alunos da turma…</p>
+    }
+  </mat-card-content>
+</mat-card>
+
+@if (carregandoRelatorio()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Gerando relatório" />
+}
+
+@if (tipo.value === 'TURMA') {
+  @if (relatorio(); as resumo) {
+    <section class="stats-grid">
+      <app-stat-card
+        rotulo="Média da turma"
+        [valor]="resumo.mediaTurma !== null ? (resumo.mediaTurma | number: '1.2-2') : '—'"
+        icone="trending_up"
+        [tom]="(resumo.mediaTurma ?? 0) >= 7 ? 'sucesso' : 'alerta'"
+      />
+      <app-stat-card rotulo="Alunos" [valor]="resumo.totalAlunos" icone="groups" />
+      <app-stat-card rotulo="Aprovados" [valor]="resumo.aprovados" icone="verified" tom="sucesso" />
+      <app-stat-card
+        rotulo="Reprovados"
+        [valor]="resumo.reprovadosNota + resumo.reprovadosFalta"
+        icone="cancel"
+        [tom]="resumo.reprovadosNota + resumo.reprovadosFalta > 0 ? 'risco' : 'padrao'"
+      />
+    </section>
+
+    <mat-card class="resultado">
+      <mat-card-header>
+        <mat-card-title>{{ resumo.disciplina }}</mat-card-title>
+        <mat-card-subtitle>
+          {{ resumo.professor }} · {{ resumo.periodoLetivo }} · {{ resumo.encerrada ? 'Encerrada' : 'Em andamento' }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="resumo.alunos">
+            <ng-container matColumnDef="nome">
+              <th mat-header-cell *matHeaderCellDef>Aluno</th>
+              <td mat-cell *matCellDef="let aluno"><strong>{{ aluno.nome }}</strong></td>
+            </ng-container>
+            <ng-container matColumnDef="matricula">
+              <th mat-header-cell *matHeaderCellDef>Matrícula</th>
+              <td mat-cell *matCellDef="let aluno">{{ aluno.numeroMatricula }}</td>
+            </ng-container>
+            <ng-container matColumnDef="media">
+              <th mat-header-cell *matHeaderCellDef>Média</th>
+              <td mat-cell *matCellDef="let aluno">
+                {{ aluno.media !== null ? (aluno.media | number: '1.2-2') : '—' }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="frequencia">
+              <th mat-header-cell *matHeaderCellDef>Frequência</th>
+              <td mat-cell *matCellDef="let aluno">
+                <app-frequencia-badge [percentual]="aluno.frequencia" />
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="situacao">
+              <th mat-header-cell *matHeaderCellDef>Situação</th>
+              <td mat-cell *matCellDef="let aluno">
+                <span class="badge" [class]="'badge ' + classeStatus(aluno.situacao)">
+                  {{ rotuloStatus(aluno.situacao) }}
+                </span>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="colunasTurma"></tr>
+            <tr mat-row *matRowDef="let row; columns: colunasTurma"></tr>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+}
+
+@if (tipo.value === 'BOLETIM') {
+  @if (boletim(); as dados) {
+    <mat-card class="resultado">
+      <mat-card-header>
+        <mat-card-title>{{ dados.aluno }}</mat-card-title>
+        <mat-card-subtitle>Matrícula {{ dados.numeroMatricula }} · {{ dados.boletim.disciplina }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="resumo-grid">
+          <div class="resumo-item">
+            <span>Professor</span>
+            <strong>{{ dados.boletim.professor }}</strong>
+          </div>
+          <div class="resumo-item">
+            <span>Período</span>
+            <strong>{{ dados.boletim.periodoLetivo }}</strong>
+          </div>
+          <div class="resumo-item">
+            <span>Média</span>
+            <strong>{{ dados.boletim.media !== null ? (dados.boletim.media | number: '1.2-2') : '—' }}</strong>
+          </div>
+          <div class="resumo-item">
+            <span>Nota necessária</span>
+            <strong>{{ textoNotaNecessaria(dados.boletim) }}</strong>
+          </div>
+          <div class="resumo-item">
+            <span>Frequência</span>
+            <strong>{{ dados.boletim.frequencia | percentual }}</strong>
+          </div>
+          <div class="resumo-item">
+            <span>Situação</span>
+            <span class="badge" [class]="'badge ' + classeStatus(dados.boletim.status)">
+              {{ rotuloStatus(dados.boletim.status) }}
+            </span>
+          </div>
+        </div>
+
+        @if (dados.boletim.alertaFrequencia) {
+          <div class="alert alert-warning" role="alert">
+            <mat-icon aria-hidden="true">warning</mat-icon>
+            <span>Frequência abaixo ou próxima do limite mínimo de 75%.</span>
+          </div>
+        }
+
+        <div class="table-container">
+          <table mat-table [dataSource]="dados.boletim.avaliacoes">
+            <ng-container matColumnDef="descricao">
+              <th mat-header-cell *matHeaderCellDef>Avaliação</th>
+              <td mat-cell *matCellDef="let avaliacao">{{ avaliacao.descricao }}</td>
+            </ng-container>
+            <ng-container matColumnDef="peso">
+              <th mat-header-cell *matHeaderCellDef>Peso</th>
+              <td mat-cell *matCellDef="let avaliacao">{{ avaliacao.peso }}</td>
+            </ng-container>
+            <ng-container matColumnDef="nota">
+              <th mat-header-cell *matHeaderCellDef>Nota</th>
+              <td mat-cell *matCellDef="let avaliacao">
+                {{ avaliacao.valor !== null ? (avaliacao.valor | number: '1.1-2') : 'Não lançada' }}
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="colunasAvaliacoes"></tr>
+            <tr mat-row *matRowDef="let row; columns: colunasAvaliacoes"></tr>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+}
+
+@if (tipo.value === 'HISTORICO') {
+  @if (historico(); as dados) {
+    <section class="stats-grid">
+      <app-stat-card
+        rotulo="Média geral"
+        [valor]="dados.mediaGeral !== null ? (dados.mediaGeral | number: '1.2-2') : '—'"
+        icone="trending_up"
+        [tom]="(dados.mediaGeral ?? 0) >= 7 ? 'sucesso' : 'alerta'"
+      />
+      <app-stat-card rotulo="Disciplinas" [valor]="dados.disciplinas.length" icone="menu_book" />
+    </section>
+
+    <mat-card class="resultado">
+      <mat-card-header>
+        <mat-card-title>{{ dados.nome }}</mat-card-title>
+        <mat-card-subtitle>Matrícula {{ dados.numeroMatricula }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-container">
+          <table mat-table [dataSource]="dados.disciplinas">
+            <ng-container matColumnDef="periodo">
+              <th mat-header-cell *matHeaderCellDef>Período</th>
+              <td mat-cell *matCellDef="let item">{{ item.periodoLetivo }}</td>
+            </ng-container>
+            <ng-container matColumnDef="disciplina">
+              <th mat-header-cell *matHeaderCellDef>Disciplina</th>
+              <td mat-cell *matCellDef="let item"><strong>{{ item.disciplina }}</strong></td>
+            </ng-container>
+            <ng-container matColumnDef="professor">
+              <th mat-header-cell *matHeaderCellDef>Professor</th>
+              <td mat-cell *matCellDef="let item">{{ item.professor }}</td>
+            </ng-container>
+            <ng-container matColumnDef="media">
+              <th mat-header-cell *matHeaderCellDef>Média</th>
+              <td mat-cell *matCellDef="let item">
+                {{ item.media !== null ? (item.media | number: '1.2-2') : '—' }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="frequencia">
+              <th mat-header-cell *matHeaderCellDef>Frequência</th>
+              <td mat-cell *matCellDef="let item">{{ item.frequencia | percentual }}</td>
+            </ng-container>
+            <ng-container matColumnDef="situacao">
+              <th mat-header-cell *matHeaderCellDef>Situação</th>
+              <td mat-cell *matCellDef="let item">
+                <span class="badge" [class]="'badge ' + classeStatus(item.status)">
+                  {{ rotuloStatus(item.status) }}
+                </span>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="colunasHistorico"></tr>
+            <tr mat-row *matRowDef="let row; columns: colunasHistorico"></tr>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+}
+
+@if (!carregandoRelatorio() && !relatorio() && !boletim() && !historico()) {
+  <mat-card class="resultado">
+    <app-empty-state
+      titulo="Nenhum relatório gerado"
+      mensagem="Selecione os filtros e clique em “Gerar relatório”."
+      icone="summarize"
+    />
+  </mat-card>
+}

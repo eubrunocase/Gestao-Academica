@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: gestao-academica
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:gestao}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: America/Bahia
+  mvc:
+    problemdetails:
+      enabled: false
+
+server:
+  port: ${SERVER_PORT:8080}
+
+jwt:
+  secret: ${JWT_SECRET:dev-only-secret-key-change-me-please-0123456789abcdef}
+  expiracao-minutos: 120
+
+academico:
+  media-aprovacao: 7.0
+  frequencia-minima: 75
+  alerta-frequencia-margem: 5
+  login-max-tentativas: 5
+  login-bloqueio-minutos: 15
+  seed-enabled: ${SEED_ENABLED:false}
+
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model: ${GEMINI_MODEL:gemini-2.5-flash}
+  base-url: https://generativelanguage.googleapis.com/v1beta
+  fallback-enabled: ${GEMINI_FALLBACK:false}
+  system-prompt: |
+    Voce e o assistente virtual do Sistema de Gestao Academica da UCSAL.
+    Responda sempre em portugues do Brasil, de forma objetiva e curta.
+    Ajude apenas com duvidas sobre o uso do portal academico e procedimentos
+    academicos gerais (matricula, notas, frequencia, historico, avisos,
+    denuncias e relatorios). Nao invente regras especificas da instituicao,
+    nao acesse nem solicite dados pessoais e, quando a duvida depender de uma
+    regra interna, oriente o usuario a procurar a Secretaria Academica ou a
+    Coordenacao do curso.
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    br.ucsal.gestaoacademica: INFO

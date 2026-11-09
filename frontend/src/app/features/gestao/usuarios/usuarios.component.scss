@@ -1,0 +1,29 @@
+.filtros {
+  margin-bottom: 20px;
+}
+
+.filtros mat-card-content {
+  padding-top: 8px;
+}
+
+.form-filtros {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.form-filtros mat-form-field {
+  flex: 1 1 240px;
+}
+
+.acoes-filtro {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.tabela-card mat-card-content {
+  padding-top: 12px;
+}

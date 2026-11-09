@@ -1,0 +1,73 @@
+<app-page-header titulo="Cursos" subtitulo="Cursos oferecidos pela instituição e suas disciplinas.">
+  <button mat-flat-button color="primary" type="button" (click)="novo()">
+    <mat-icon aria-hidden="true">add</mat-icon>
+    Novo curso
+  </button>
+</app-page-header>
+
+@if (carregando()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Carregando cursos" />
+}
+
+@if (erro()) {
+  <div class="alert alert-danger" role="alert">
+    <mat-icon aria-hidden="true">error</mat-icon>
+    <span>{{ erro() }}</span>
+  </div>
+}
+
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Lista de cursos</mat-card-title>
+    <mat-card-subtitle>{{ filtrados().length }} curso(s)</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="busca">
+      <mat-form-field appearance="outline">
+        <mat-label>Buscar curso</mat-label>
+        <input matInput [formControl]="busca" (input)="buscar()" placeholder="Digite o nome" />
+        <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    @if (!carregando() && filtrados().length === 0) {
+      <app-empty-state
+        titulo="Nenhum curso encontrado"
+        mensagem="Cadastre o primeiro curso ou ajuste a busca."
+        icone="school"
+      >
+        <button mat-flat-button color="primary" type="button" (click)="novo()">Novo curso</button>
+      </app-empty-state>
+    } @else {
+      <div class="table-container">
+        <table mat-table [dataSource]="paginados()">
+          <ng-container matColumnDef="nome">
+            <th mat-header-cell *matHeaderCellDef>Nome</th>
+            <td mat-cell *matCellDef="let curso"><strong>{{ curso.nome }}</strong></td>
+          </ng-container>
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef>Ações</th>
+            <td mat-cell *matCellDef="let curso" class="acoes">
+              <button mat-icon-button type="button" [attr.aria-label]="'Editar ' + curso.nome" (click)="editar(curso)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" color="warn" [attr.aria-label]="'Excluir ' + curso.nome" (click)="excluir(curso)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+          <tr mat-row *matRowDef="let row; columns: colunas"></tr>
+        </table>
+      </div>
+      <mat-paginator
+        [length]="filtrados().length"
+        [pageSize]="tamanho()"
+        [pageSizeOptions]="[10, 20, 50]"
+        [pageIndex]="pagina()"
+        (page)="aoPaginar($event)"
+        aria-label="Paginação de cursos"
+      />
+    }
+  </mat-card-content>
+</mat-card>

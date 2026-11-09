@@ -1,0 +1,59 @@
+.sucesso-card {
+  max-width: 720px;
+}
+
+.sucesso-card mat-card-content {
+  padding-top: 12px;
+}
+
+.protocolo-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 16px;
+  border: 1px dashed var(--ga-primary);
+  border-radius: 12px;
+  background: var(--ga-primary-light);
+  margin-bottom: 14px;
+}
+
+.protocolo-box span:first-child {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ga-text-muted);
+  font-weight: 700;
+}
+
+.protocolo-box strong {
+  font-size: 1.3rem;
+  letter-spacing: 0.06em;
+  color: var(--ga-primary-dark);
+  overflow-wrap: anywhere;
+}
+
+.form-denuncia {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 4px 16px;
+  padding-top: 8px;
+}
+
+.form-denuncia .span-2 {
+  grid-column: 1 / -1;
+}
+
+.anonima {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.acoes {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}

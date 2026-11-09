@@ -1,0 +1,70 @@
+.turmas-grid {
+  margin-top: 20px;
+}
+
+.turma-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.turma-card mat-card-content {
+  flex: 1 1 auto;
+}
+
+.linha-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.dados-turma {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.dados-turma > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #f6f8fd;
+}
+
+.dados-turma mat-icon {
+  color: var(--ga-primary);
+}
+
+.dados-turma span {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.dados-turma small {
+  font-size: 0.68rem;
+  color: var(--ga-text-muted);
+}
+
+.barra-vagas {
+  height: 8px;
+  border-radius: 999px;
+  background: #e6eaf2;
+  overflow: hidden;
+  margin-top: 14px;
+}
+
+.barra-vagas span {
+  display: block;
+  height: 100%;
+  background: var(--ga-primary);
+  border-radius: inherit;
+}
+
+.bloco {
+  margin-top: 20px;
+}

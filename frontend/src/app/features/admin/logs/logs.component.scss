@@ -1,0 +1,23 @@
+.aba-card {
+  margin-top: 16px;
+}
+
+.aba-card mat-card-content {
+  padding-top: 12px;
+}
+
+.filtros {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.filtros mat-form-field {
+  flex: 1 1 180px;
+}
+
+.filtros button {
+  margin-top: 8px;
+}
